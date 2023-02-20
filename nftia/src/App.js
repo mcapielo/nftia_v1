@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Route, Routes } from "react-router-dom"
+import { Route, Routes } from "react-router-dom";
 import * as fcl from "@onflow/fcl";
 
 import './App.css';
 
-import Home from "./pages/Home"
-import MarketPlace from "./pages/MarketPlace"
-import Workshop from "./pages/Workshop"
-import NotFound from "./pages/NotFound"
-import Header from "./componets/Header"
+import Home from "./pages/Home";
+import MarketPlace from "./pages/MarketPlace";
+import Workshop from "./pages/Workshop";
+import NotFound from "./pages/NotFound";
+import Header from "./componets/Header";
+import Footer from "./componets/Footer";
 
 
 
@@ -37,6 +38,7 @@ fcl.config({
         <Route path="/workshop" element={<Workshop user={user} />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
+      <Footer />
     </div>
   )
 };

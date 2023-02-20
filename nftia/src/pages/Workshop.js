@@ -1,12 +1,13 @@
 import React from 'react';
 
-const MarketPlace = () => {
+import CreateArtForm from '../componets/CreateArtForm';
+
+const Workshop = () => {
   return (
     <div>
-      <h1>Workshop</h1>
-      <p>Welcome to the Workshop page!</p>
+      <CreateArtForm />
     </div>
   );
 };
 
-export default MarketPlace;
+export default Workshop;

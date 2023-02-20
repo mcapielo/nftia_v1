@@ -11,12 +11,17 @@ const Header = ({ user }) => {
 
     const AuthedState = () => {
         return (
-          <div>
-            <a href={user && user.addr ? 'https://testnet.flowscan.org/account/'+user.addr : ''} className="nav-link text-white link-info" rel="noreferrer" target="_blank">
+          <ul>
+             <li className="nav-item">
+             <a href={user && user.addr ? 'https://testnet.flowscan.org/account/'+user.addr : ''} className="nav-link text-white link-info" rel="noreferrer" target="_blank">
               {user && user.addr ? user.addr : ''}
             </a>
+            </li>
+            <li className="nav-item">
+              <Link className="nav-link" to="/workshop">Workshop</Link>
+            </li>
             <button className="btn btn-outline-info btn-lg btn-block" onClick={fcl.unauthenticate}>Log Out</button>
-          </div>
+          </ul>
         )
       }
     
@@ -46,10 +51,10 @@ const Header = ({ user }) => {
         <div className="collapse navbar-collapse" id="navbarNav">
           <ul className="navbar-nav me-auto mb-2 mb-lg-0">
             <li className="nav-item">
-              <Link className="nav-link" to="/about">About</Link>
+              <Link className="nav-link" to="/">Home</Link>
             </li>
             <li className="nav-item">
-              <Link className="nav-link" to="/contact">Contact</Link>
+              <Link className="nav-link" to="/marketplace">MarketPlace</Link>
             </li>
           </ul>
           <ul className="navbar-nav">

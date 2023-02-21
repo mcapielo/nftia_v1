@@ -2,10 +2,12 @@ import React from 'react';
 
 import CreateArtForm from '../componets/CreateArtForm';
 
-const Workshop = () => {
+const Workshop = (props) => {
+
+
   return (
     <div>
-      <CreateArtForm />
+      <CreateArtForm user={props.user}/>
     </div>
   );
 };

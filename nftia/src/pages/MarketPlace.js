@@ -1,10 +1,10 @@
 import React from 'react';
+import SaleCollections from '../componets/SaleCollections';
 
 const MarketPlace = () => {
   return (
     <div>
-      <h1>MarketPlace</h1>
-      <p>Welcome to the MarketPlace page!</p>
+      <SaleCollections />
     </div>
   );
 };

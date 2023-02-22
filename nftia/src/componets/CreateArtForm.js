@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import checkUser from '../library/checkuser';
 import { Navigate } from 'react-router-dom';
 
 import * as fcl from "@onflow/fcl";
@@ -8,13 +7,11 @@ import * as ipfsClient from 'ipfs-http-client';
 import {Buffer} from 'buffer';
 
 
-const CreateArtForm = (props) => {
+const CreateArtForm = ({user}) => {
+
+  
   const [nameOfNFT, setNameOfNFT ] = useState('');
   const [nft_prompt, setNFTPrompt] = useState('');
-
-  if (!props.user && !props.user.addr) {
-    return <Navigate to="/" />;
-  };
 
   //OPEN IA SET UP.
  const configuration = new Configuration({
@@ -36,18 +33,6 @@ const client = ipfsClient.create({
        authorization: auth,
    },
 });
-
-//FLOW ENDPOINTS SET UP.
-fcl.config({
- "discovery.wallet": process.env.REACT_APP_FCL_discovery_wallet,
- "accessNode.api": process.env.REACT_APP_FCL_accessNode_api,
- "flow.network": process.env.REACT_APP_FCL_flow_network,
- "app.detail.title":process.env.REACT_APP_FCL_app_detail_title,
- "app.detail.icon": process.env.REACT_APP_FCL_app_detail_icon
-});
-
-
-    
    
     
 

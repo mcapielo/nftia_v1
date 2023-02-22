@@ -18,19 +18,18 @@ const App = () => {
   
   useEffect(() => fcl.currentUser.subscribe(setUser), [])
 
-  //FLOW ENDPOINTS SET UP.
+//FLOW ENDPOINTS SET UP.
 fcl.config({
   "discovery.wallet": "https://fcl-discovery.onflow.org/testnet/authn", // Endpoint set to Testnet
   "accessNode.api": "https://rest-testnet.onflow.org", // Endpoint set to Testnet
   "flow.network": "testnet",
   "app.detail.title": "NFTIA",
   "app.detail.icon": "http://localhost:3000/images/logo-nftia.png"
-
 })
 
 
   return (
-    <div>
+    <div className="App">
       <Header user={user}/>
       <Routes>
         <Route path="/" element={<Home />} />

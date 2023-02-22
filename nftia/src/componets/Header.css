@@ -6,6 +6,7 @@
   max-height: 50px;
 }
 
+
 @media (prefers-reduced-motion: no-preference) {
   .Header-logo {
     animation: Header-logo-spin infinite 20s linear;

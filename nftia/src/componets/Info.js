@@ -4,8 +4,8 @@ const Info = () => {
 
     return (
 
-    <div className="bg-dark text-secondary px-4 py-5 text-center">
-        <h1 className="display-5 fw-bold text-white">A.I. Art + Blockchain = NFT</h1>
+    <div className="text-secondary px-4 py-5 text-center">
+        <h1 className="display-5 fw-bold ">A.I. Art + Blockchain = NFT</h1>
         <br/>
         <div className="clearfix">
           <img src="/images/robotpainting.jpg" className="col-md-4 float-md-end mb-3 ms-md-3" alt="..."/>

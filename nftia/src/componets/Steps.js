@@ -3,7 +3,7 @@ const Steps = () => {
 
     return (
 
-        <div className="container text-white">
+        <div className="container">
             <hr></hr>
             <br/>
             <h1 className="my-5">Ready to become a digital artist?</h1>

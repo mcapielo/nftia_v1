@@ -16,6 +16,8 @@ import Footer from "./componets/Footer";
 const App = () => {
   const [user, setUser] = useState()
   
+
+  
   useEffect(() => fcl.currentUser.subscribe(setUser), [])
 
 //FLOW ENDPOINTS SET UP.

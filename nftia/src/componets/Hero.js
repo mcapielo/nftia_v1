@@ -14,7 +14,7 @@ const Hero = () => {
                     <button type="button" className="btn btn-outline-warning btn-lg px-4" >Learn More</button>
                 </div>
                 <div className="col-lg-6 d-flex justify-content-center align-items-center">
-                    <img src="https://nftia.infura-ipfs.io/ipfs/QmUXgcu2qTBD76Y58EwGom97d2rQjD55stj6DLpWZ2PsLi" alt="Hero Image" className="img-fluid rounded-circle" style={{ maxWidth: '400px' }} />
+                    <img src="https://nftia.infura-ipfs.io/ipfs/QmUXgcu2qTBD76Y58EwGom97d2rQjD55stj6DLpWZ2PsLi" alt="Hero Image" className="img-fluid" style={{ maxWidth: '400px' }} />
                 </div>
             </div>
         </div>

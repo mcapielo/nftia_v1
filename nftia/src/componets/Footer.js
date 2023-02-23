@@ -1,12 +1,30 @@
 import { useState } from 'react';
+import UserMessage from './UserMessage'
 
 const Footer = () => {
 
   const [emailSub, setEmailSub] = useState();
+  const [showAlert, setShowAlert] = useState(false);
 
   const subscribe = async ( ) => {
     try{
-
+      const config = {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+           email: emailSub
+           })
+      }
+      const response =  await fetch('/api/add_subscriber', config)
+      .then((res) => res.json())
+      .then(data => {
+        document.getElementById("newsletter1").value = "";
+        setShowAlert(true);
+      })
+      .catch((err) => console.error(err))
       
     } catch (error) {
       console.log("THIS IS AN ERROR", error);
@@ -53,14 +71,16 @@ const Footer = () => {
 
             <div className="col-md-5 offset-md-1 mb-3">
               <form>
-                <h5>Subscribe to our newsletter</h5>
-                <p>Monthly digest of what's new and exciting from us.</p>
+                <h5>Join Our Community: Subscribe Today </h5>
+                <p>Receive the latest news and updates about our products.</p>
                 <div className="d-flex flex-column flex-sm-row w-100 gap-2">
                   <label for="newsletter1" className="visually-hidden">Email address</label>
                   <input id="newsletter1" type="text" className="form-control" onChange={(e) => setEmailSub(e.target.value)} placeholder="Email address"/>
-                  <button className="btn btn-primary" type="button" onClick={() => subscribe(emailSub)}>Subscribe</button>
+                  <button className="btn btn-outline-info" type="button" onClick={() => subscribe(emailSub)}>Subscribe</button>
                 </div>
               </form>
+              <br></br>
+                  <UserMessage variant="info" message="Thank you, Now you are subscribed!" triggerAlert={showAlert} />
             </div>
           </div>
 

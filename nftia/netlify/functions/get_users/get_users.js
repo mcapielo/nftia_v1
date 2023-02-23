@@ -1,7 +1,6 @@
 const { MongoClient } = require("mongodb");
 
 const mongoClient = new MongoClient(process.env.MONGODB_URI);
-
 const clientPromise = mongoClient.connect();
 
 const handler = async (event) => {

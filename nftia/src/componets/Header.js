@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import * as fcl from "@onflow/fcl";
 import './Header.css';
 
@@ -7,10 +7,12 @@ import './Header.css';
 
 const Header = ({ user }) => {
 
-    //console.log("user", user);
+    const [loading, setLoading] = useState(false);
 
+    const navigate = useNavigate();
 
     const AddUserApiCall = async (addr) => {
+        let returning_value;
 
         const config = {
         method: 'POST',
@@ -26,57 +28,42 @@ const Header = ({ user }) => {
         const add_User =  await fetch('/api/add_user', config)
         .then(response => response.json())
         .then(data => {
-             if (data) {
-                console.log("Response from Api", data);
-            } else {
-                // Handle non-array response
-                console.error('Response is not an array');
-            }
+          console.log("Should return this",data.ok);
+          returning_value =  data.ok;
         })
         .catch((error) => {
             // This function will be called if the Promise is rejected with an error
             console.error("There was an error:", error);
         });  
 
-    }
-
-
-    const SignUp = () => {
-      fcl.signUp
-      .then((response) => {
-        console.log(response)
-        // Process the response as needed
-      })
-      .catch((error) => {
-        console.error(error)
-        // Handle the error as needed
-      })
+        return returning_value;
 
     }
 
     const LogIn = () => {
-      fcl.logIn()
+      setLoading(true);
+      fcl.authenticate()
       .then((response) => {
         console.log("Response from Login", response);
-
-        await AddUserApiCall(response.addr)
-        .then((apiResponse) => {
-          console.log("Response from Api Call", apiResponse);
-        })
-        .catch((error) => {
-          console.error("Error from Api Call", error);
-          // Handle the error as needed
-        })
-
-        console.log("ADD", address);
-
-
-
-        // Process the response as needed
+          AddUserApiCall(response.addr)
+          .then((data) => {
+            console.log("Response from Api Call", data);
+            if (data) {
+              setLoading(false);
+              navigate('/workshop');
+            }
+          })
+          .catch((error) => {
+            console.error("Error from Login", error);
+            //Show an Alert saying Maintenance Mode.
+            navigate('/maitenance');
+          })
+        
       })
       .catch((error) => {
         console.error("Error from Login", error);
-        // Handle the error as needed
+        //Show an Alert saying Maintenance Mode.
+        navigate('/maitenance');
       })
 
     }
@@ -95,14 +82,20 @@ const Header = ({ user }) => {
             <button className="btn btn-outline-info btn-lg btn-block" onClick={fcl.unauthenticate}>Log Out</button>
           </ul>
         )
-      }
+    }
     
     const UnauthenticatedState = () => {
 
       return (
         <div>
-          <button className="btn btn-outline-info btn-lg btn-block" onClick={LogIn}>Log In</button>
-          <button className="btn btn-outline-info btn-lg btn-block" onClick={SignUp}>Sign Up</button>
+           {loading ? 
+           <button class="btn btn-outline-info btn-lg btn-block" type="button" disabled>
+                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                Authenticating...
+              </button> 
+           : 
+            <button className="btn btn-outline-info btn-lg btn-block" onClick={LogIn}>Sign InUp</button>           
+           }
         </div>
       )
     }

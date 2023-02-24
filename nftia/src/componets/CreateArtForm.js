@@ -50,6 +50,7 @@ const client = ipfsClient.create({
       const isFlagged = moderation_response["data"]["results"][0].flagged
 
       if (isFlagged) {
+        //Show Message of Bad Request Input.
         return false
       }
 
@@ -66,7 +67,6 @@ const client = ipfsClient.create({
     const imageData = image_response.data.data[0].b64_json;
 
     const buffer = Buffer.from(imageData, 'base64');
-      
       
     const added = await client.add(buffer);
     const hash = added.path;
@@ -102,8 +102,12 @@ const client = ipfsClient.create({
         });
         console.log("https://testnet.flowscan.org/transaction/"+MintTRXId+"/events")
         
-        const Minttransaction = fcl.tx(MintTRXId).onceSealed();
+        const Minttransaction = await fcl.tx(MintTRXId).onceSealed();
         console.log(Minttransaction);
+        if (Minttransaction) {
+          AddNftToCollection(nameOfNFT, nft_prompt, MintTRXId, hash );
+          //NEED TO REFRESH ALBUM.
+        }
         return Minttransaction;
       } catch (error) {
         console.log("Error Making TRX - Mint NFT", error);
@@ -111,6 +115,39 @@ const client = ipfsClient.create({
     } catch (error) {
       console.log("Error Creating file - IPFS", error);
     }
+  }
+
+  const AddNftToCollection = async (name, prompt, trxid, hash) => {
+    
+    let returning_value = false;
+
+      const config = {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            address: user.addr,
+            name: name,
+            prompt: prompt,
+            trxid: trxid,
+            hash: hash
+          })
+        }
+  
+        const add_user_nft =  await fetch('/api/add_user_nft', config)
+        .then(response => response.json())
+        .then(data => {
+          console.log("flag user response api", data);
+          //returning_value =  {"ok": data.ok, "AccountSetUp": data.value?.AccountSetUp? data.value.AccountSetUp : false};
+        })
+        .catch((error) => {
+            // This function will be called if the Promise is rejected with an error
+            console.error("There was an error:", error);
+        });  
+
+      return returning_value;
   }
 
 
@@ -123,11 +160,11 @@ const client = ipfsClient.create({
                 <br></br>
                 <div className="form-floating mb-3">
                     <input type="text" className="form-control" id="setNameOfNFT" onChange={(e) => setNameOfNFT(e.target.value)} />
-                    <label for="setNameOfNFT">Give A Name To Your Art, Ex: "My little Tomas"</label>
+                    <label className="text-dark" for="setNameOfNFT">Give A Name To Your Art, Ex: "My little Tomas"</label>
                 </div>
                 <div className="form-floating mb-3">
                     <input type="text" className="form-control" id="setNFTPrompt" onChange={(e) => setNFTPrompt(e.target.value)}/>
-                    <label for="setNFTPrompt">Please Write your art description, Ex: "little white sad cat sitting on a table with an apple" </label>
+                    <label className="text-dark" for="setNFTPrompt">Please Write your art description, Ex: "little white sad cat sitting on a table with an apple" </label>
                 </div>
                 <button className="btn btn-outline-info btn-lg btn-block" onClick={() => mint()}>Create Art</button>
             </div>

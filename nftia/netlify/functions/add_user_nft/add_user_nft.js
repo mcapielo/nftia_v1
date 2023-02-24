@@ -15,6 +15,10 @@ const handler = async (event) => {
 
   try {
     const { address } = JSON.parse(event.body);
+    const { name } = JSON.parse(event.body);
+    const { prompt } = JSON.parse(event.body);
+    const { trxid } = JSON.parse(event.body);
+    const { hash } = JSON.parse(event.body);
 
     if (!address) {
       return errorGen('Missing Input');
@@ -24,8 +28,8 @@ const handler = async (event) => {
     const currentDate = new Date();
 
     const filter = { _id: address };
-    const update = {  $setOnInsert: { NFTCounter: 0, AccountSetUp: false}, $set: { lastTime: currentDate } };
-    const options = { upsert: true, new: true, setDefaultsOnInsert: true };
+    const update =   { $inc: { NFTCounter : 1 }, $set: { lastTime: currentDate },   $push: { NFTCollection: { name: name , prompt: prompt, trxid: trxid, hash: hash }}  };
+    const options = { upsert: false, new: false };
     const result = await collection.findOneAndUpdate(filter, update, options);
     if (result){
       return {
@@ -42,3 +46,4 @@ const handler = async (event) => {
 }
 
 module.exports = { handler }
+

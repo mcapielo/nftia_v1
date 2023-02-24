@@ -2,17 +2,20 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import * as fcl from "@onflow/fcl";
 import './Header.css';
+import UserMessage from './UserMessage'
 
 
 
 const Header = ({ user }) => {
 
-    const [loading, setLoading] = useState(false);
+    const [loading_auth_button, setLoadingAuthButton] = useState(false);
+    const [showSetupUserAlert, setShowSetupUserAlert] = useState(false);
+
 
     const navigate = useNavigate();
 
     const AddUserApiCall = async (addr) => {
-        let returning_value;
+        let returning_value = false;
 
         const config = {
         method: 'POST',
@@ -28,8 +31,10 @@ const Header = ({ user }) => {
         const add_User =  await fetch('/api/add_user', config)
         .then(response => response.json())
         .then(data => {
-          console.log("Should return this",data.ok);
-          returning_value =  data.ok;
+          console.log("Should return this",data);
+          if (data.ok) {
+            returning_value =  {"ok": data.ok, "AccountSetUp": data.value?.AccountSetUp? data.value.AccountSetUp : false};
+          }
         })
         .catch((error) => {
             // This function will be called if the Promise is rejected with an error
@@ -40,16 +45,54 @@ const Header = ({ user }) => {
 
     }
 
+    const FlagUserSetup = async (addr) => {
+
+      let returning_value = false;
+
+      const config = {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            address: addr
+          })
+        }
+  
+        const flag_user_setup =  await fetch('/api/flag_user_setup', config)
+        .then(response => response.json())
+        .then(data => {
+          console.log("flag user response api", data);
+          //returning_value =  {"ok": data.ok, "AccountSetUp": data.value?.AccountSetUp? data.value.AccountSetUp : false};
+        })
+        .catch((error) => {
+            // This function will be called if the Promise is rejected with an error
+            console.error("There was an error:", error);
+        });  
+
+      return returning_value;
+    }
+
     const LogIn = () => {
-      setLoading(true);
+      setLoadingAuthButton(true);
       fcl.authenticate()
       .then((response) => {
         console.log("Response from Login", response);
           AddUserApiCall(response.addr)
           .then((data) => {
             console.log("Response from Api Call", data);
-            if (data) {
-              setLoading(false);
+            if (data.ok && data.AccountSetUp) {
+              setLoadingAuthButton(false);
+              navigate('/workshop');
+            } else if (data.ok && data.AccountSetUp === false) {
+              const responseSetAccount = SetAccount();
+              console.log("response from set account", responseSetAccount);
+              if (responseSetAccount) {
+                FlagUserSetup(response.addr);
+                console.log("ADD to flag", response.addr);
+              }
+              setLoadingAuthButton(false);
               navigate('/workshop');
             }
           })
@@ -68,6 +111,63 @@ const Header = ({ user }) => {
 
     }
 
+    const SetAccount = async () => {
+
+      //Spinner is on
+
+      //Show an alert saying Last Step...
+      setShowSetupUserAlert(true);
+
+      //Cadence Script to set up user
+      try{
+        const setUpUserTRXId = await fcl.mutate({
+          cadence: `
+            import NFTIA from 0x19e6fc6fdfde98d5
+            import NonFungibleToken from 0x631e88ae7f1d7c20
+            import FungibleToken from 0x9a0766d93b6608b7
+            import FlowToken from 0x7e60df042a9c0868
+            import NFTIAMarketPlace from 0x19e6fc6fdfde98d5
+        
+                transaction () {
+        
+                    prepare(acct: AuthAccount) {
+                    
+                        // CREATE A NFTIA COLLECTION ( for Album )
+                        acct.save(<- NFTIA.createEmptyCollection() , to: /storage/NFTIACollection)
+                        acct.link<&NFTIA.Collection{NFTIA.CollectionPublic, NonFungibleToken.CollectionPublic}>(/public/NFTIACollection, target: /storage/NFTIACollection)
+                        acct.link<&NFTIA.Collection>(/private/NFTIACollection, target: /storage/NFTIACollection)
+                    
+                        // CREATE A NFTIA SALE COLLECTION ( for Market Place )
+                        let NFTIACollection = acct.getCapability<&NFTIA.Collection>(/private/NFTIACollection)
+                        let FlowTokenVault = acct.getCapability<&FlowToken.Vault{FungibleToken.Receiver}>(/public/flowTokenReceiver)
+                        acct.save(<- NFTIAMarketPlace.createSaleCollection(NFTIACollection: NFTIACollection, FlowTokenVault: FlowTokenVault), to: /storage/NFTIASaleCollection)
+                        acct.link<&NFTIAMarketPlace.SaleCollection{NFTIAMarketPlace.SaleCollectionPublic}>(/public/NFTIASaleCollection, target: /storage/NFTIASaleCollection)
+                    }
+        
+                    execute {
+                    log("A user set up happened")
+                    }
+                }
+            `
+          ,
+          proposer: fcl.authz,
+          payer: fcl.authz,
+          authorization: [fcl.authz],
+          limit: 9999,
+        });
+        
+        const TRId = setUpUserTRXId;
+        console.log(TRId)
+        console.log("https://testnet.flowscan.org/transaction/"+ TRId +"/events")
+        
+        const setUpUsertransaction = await fcl.tx(TRId).onceSealed();
+        console.log("DONE TRX", { setUpUsertransaction });
+        return { setUpUsertransaction };
+      } catch (error) {
+        console.log("Error Making TRX - SETTING USER:", error);
+      }
+    }
+
     const AuthedState = () => {
         return (
           <ul className="navbar-nav me-auto mb-2 mb-lg-0">
@@ -75,9 +175,6 @@ const Header = ({ user }) => {
              <a href={user && user.addr ? 'https://testnet.flowscan.org/account/'+user.addr : ''} className="nav-link text-white link-info" rel="noreferrer" target="_blank">
               {user && user.addr ? user.addr : ''}
             </a>
-            </li>
-            <li className="nav-item">
-              <Link className="nav-link text-white link-info" to="/workshop">Workshop</Link>
             </li>
             <button className="btn btn-outline-info btn-lg btn-block" onClick={fcl.unauthenticate}>Log Out</button>
           </ul>
@@ -88,7 +185,7 @@ const Header = ({ user }) => {
 
       return (
         <div>
-           {loading ? 
+           {loading_auth_button ? 
            <button class="btn btn-outline-info btn-lg btn-block" type="button" disabled>
                 <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                 Authenticating...
@@ -110,6 +207,7 @@ const Header = ({ user }) => {
           <h1>NFTIA</h1>
           <h6><span className="badge rounded-pill text-bg-info">Testnet - Beta</span></h6> 
         </Link>
+        <UserMessage variant="info" time="7000" message="Great!! Last Step and we are ready to craft!!" triggerAlert={showSetupUserAlert} />
         <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
           <span className="navbar-toggler-icon"></span>
         </button>
@@ -122,6 +220,15 @@ const Header = ({ user }) => {
             <li className="nav-item">
               <Link className="nav-link text-white link-info" to="/marketplace">MarketPlace</Link>
             </li>
+
+            {user && user.addr ?
+              <li className="nav-item">
+              <Link className="nav-link text-white link-info" to="/workshop">Workshop</Link>
+              </li>
+            :
+              ""
+            }
+
           </ul>
           <ul className="navbar-nav">
             <li className="nav-item">

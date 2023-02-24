@@ -12,7 +12,7 @@ const UserMessage = (props) => {
 
     const displayAlert = () => {  
         setShowAlert(true);
-        setTimeout(() => setShowAlert(false), 5000);
+        setTimeout(() => setShowAlert(false), props.time);
     }
 
   return (
@@ -20,6 +20,7 @@ const UserMessage = (props) => {
       {showAlert &&
         <div className={`alert alert-${props.variant} alert-dismissible fade show`} role="alert">
           {props.message}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
       }
     </>

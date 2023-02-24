@@ -12,27 +12,6 @@ const Workshop = ({ user }) => {
     return <Navigate to="/" />;
  };
 
-//  fcl.send([fcl.getAccount(user.addr)])
-//   .then(userAccount => {
-//     console.log(userAccount.contracts);
-//     const hasCollection = userAccount?.contracts?.hasOwnProperty('my_collection');
-
-//     console.log("Has Collection", hasCollection)
-
-//     if (hasCollection) {
-//     // The user has the necessary collection
-//     } else {
-//     // The user is missing the necessary collection
-//     }
-//   })
-//   .catch(error => {
-// // Handle errors here
-//   });
-
-
-
-
-
 return (
   <div>
     <CreateArtForm user={user}/>

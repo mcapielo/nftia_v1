@@ -1,94 +1,133 @@
 import React, { useState, useEffect } from 'react';
 import * as fcl from "@onflow/fcl";
 import * as t from "@onflow/types";
-
+import PostTemplate from './PostTemplate';
 
 
 const Album = ({ user }) => {
 
     const [nfts, setNFTs] = useState([]);
     const [price, setPrice] = useState();
-    const [id, setId] = useState();
 
+    const setNFTSaleStatus =  async (id, hash, price, forSale) => {
     
-    // Put a link of the NFT on the SALECOLLECTION - CADENCE SCRIPT -> Should be a lambda
-    const listForSale = async () => {
-    
-    console.log("ID", id);
-    console.log("PRICE", price);
-    try{
-      const listForSaleTRXId = await fcl.mutate({
-        cadence: `
-          import NFTIAMarketPlace from 0x19e6fc6fdfde98d5
-      
-              transaction(id: UInt64, price: UFix64)  {
-      
-                  prepare(acct: AuthAccount) {
-                    let saleCollection = acct.borrow<&NFTIAMarketPlace.SaleCollection>(from: /storage/NFTIASaleCollection)
-                                          ?? panic("This SaleCollection does not exist")
-                    saleCollection.listForSale(id: id, price: price)                      
-                  }
-      
-                  execute {
-                  log("A user listed an NFT Sale")
-                  }
-              }
-          `
-        ,
-        args: (arg, t) =>[arg(parseInt(id), t.UInt64 ),arg(price, t.UFix64)],
-        proposer: fcl.authz,
-        payer: fcl.authz,
-        authorization: [fcl.authz],
-        limit: 9999,
-      });
-      
-      console.log("https://testnet.flowscan.org/transaction/"+listForSaleTRXId+"/events")
-      const ListForSaleTransaction = fcl.tx(listForSaleTRXId).onceSealed();
-      console.log("DONE TRX", ListForSaleTransaction);
-      return ListForSaleTransaction;
-    } catch (error) {
-      console.log("Error Making TRX - List NFT For Sale:", error);
+      let returning_value = false;
+
+      const config = {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            address: user.addr,
+            hash: hash,
+            nftPrice: price,
+            setOnSaleStatus: forSale
+          })
+        }
+  
+        const setNFTSaleStatus =  await fetch('/api/setNFTSaleStatus', config)
+        .then(response => response.json())
+        .then(data => {
+          console.log("setNFTSaleStatus response api", data);
+          //returning_value =  {"ok": data.ok, "AccountSetUp": data.value?.AccountSetUp? data.value.AccountSetUp : false};
+        })
+        .catch((error) => {
+            // This function will be called if the Promise is rejected with an error
+            console.error("There was an error:", error);
+        });  
+
+      return returning_value;
+
+
     }
-     }
+
+    // Put a link of the NFT on the SALECOLLECTION - CADENCE SCRIPT -> Should be a lambda
+    const listForSale = async (id, hash) => {
+    
+      console.log("ID", id);
+      console.log("hash", hash);
+      console.log("PRICE", price);
+      try{
+        const listForSaleTRXId = await fcl.mutate({
+          cadence: `
+            import NFTIAMarketPlace from 0x19e6fc6fdfde98d5
+        
+                transaction(id: UInt64, price: UFix64)  {
+        
+                    prepare(acct: AuthAccount) {
+                      let saleCollection = acct.borrow<&NFTIAMarketPlace.SaleCollection>(from: /storage/NFTIASaleCollection)
+                                            ?? panic("This SaleCollection does not exist")
+                      saleCollection.listForSale(id: id, price: price)                      
+                    }
+        
+                    execute {
+                    log("A user listed an NFT Sale")
+                    }
+                }
+            `
+          ,
+          args: (arg, t) =>[arg(parseInt(id), t.UInt64 ),arg(price, t.UFix64)],
+          proposer: fcl.authz,
+          payer: fcl.authz,
+          authorization: [fcl.authz],
+          limit: 9999,
+        });
+        
+        console.log("https://testnet.flowscan.org/transaction/"+listForSaleTRXId+"/events")
+        const ListForSaleTransaction = await fcl.tx(listForSaleTRXId).onceSealed();
+        console.log("DONE TRX", ListForSaleTransaction);
+        if (ListForSaleTransaction) {
+          setNFTSaleStatus(id, hash, price, true);
+        }
+        return ListForSaleTransaction;
+      } catch (error) {
+        console.log("Error Making TRX - List NFT For Sale:", error);
+      }
+    }
 
     // Take out the link of the NFT on the SALECOLLECTION - CADENCE SCRIPT -> Should be a lambda
-    const unlistFromSale = async () => {
-    try{
-      const unListFromSaleTRXId = await fcl.mutate({
-        cadence: `
-          import NFTIAMarketPlace from 0x19e6fc6fdfde98d5
-      
-              transaction(id: UInt64)  {
-      
-                  prepare(acct: AuthAccount) {
-                    let saleCollection = acct.borrow<&NFTIAMarketPlace.SaleCollection>(from: /storage/NFTIASaleCollection)
-                                          ?? panic("This SaleCollection does not exist")
-                    saleCollection.unlistFromSale(id: id)                     
-                  }
-      
-                  execute {
-                  log("A user listed an NFT Sale")
-                  }
-              }
-          `
-        ,
-        args: (arg, t) =>[arg(parseInt(id), t.UInt64 )],
-        proposer: fcl.authz,
-        payer: fcl.authz,
-        authorization: [fcl.authz],
-        limit: 9999,
-      });
-      
-      console.log("https://testnet.flowscan.org/transaction/"+unListFromSaleTRXId+"/events")
-      const unListFromSaleTransaction = fcl.tx(unListFromSaleTRXId).onceSealed();
-      console.log("DONE TRX", unListFromSaleTransaction);
-      return unListFromSaleTransaction;
-    } catch (error) {
-      console.log("Error Making TRX - UnList NFT From Sale:", error);
-    }
+    const unlistFromSale = async (id, hash) => {
+      try{
+        const unListFromSaleTRXId = await fcl.mutate({
+          cadence: `
+            import NFTIAMarketPlace from 0x19e6fc6fdfde98d5
+        
+                transaction(id: UInt64)  {
+        
+                    prepare(acct: AuthAccount) {
+                      let saleCollection = acct.borrow<&NFTIAMarketPlace.SaleCollection>(from: /storage/NFTIASaleCollection)
+                                            ?? panic("This SaleCollection does not exist")
+                      saleCollection.unlistFromSale(id: id)                     
+                    }
+        
+                    execute {
+                    log("A user listed an NFT Sale")
+                    }
+                }
+            `
+          ,
+          args: (arg, t) =>[arg(parseInt(id), t.UInt64 )],
+          proposer: fcl.authz,
+          payer: fcl.authz,
+          authorization: [fcl.authz],
+          limit: 9999,
+        });
+        
+        console.log("https://testnet.flowscan.org/transaction/"+unListFromSaleTRXId+"/events")
+        const unListFromSaleTransaction = await fcl.tx(unListFromSaleTRXId).onceSealed();
+        console.log("DONE TRX", unListFromSaleTransaction);
+        if (unListFromSaleTransaction) {
+          setNFTSaleStatus(id, hash, 0, false);
+        }
+        return unListFromSaleTransaction;
+      } catch (error) {
+        console.log("Error Making TRX - UnList NFT From Sale:", error);
+      }
     } 
 
-    console.log("user addr",user.addr);
+    //console.log("user addr",user.addr);
     //console.log("address", props.address);
 
     const getUserNFTs = async () => {
@@ -119,6 +158,8 @@ const Album = ({ user }) => {
 
     useEffect(() => {
         getUserNFTs();
+        const intervalId = setInterval(getUserNFTs, 30000);
+      return () => clearInterval(intervalId);
     }, [])
 
   return (
@@ -132,19 +173,36 @@ const Album = ({ user }) => {
              {nfts.map(nft => (
                  <div key={nft.id} className="col">
                      <div className="card shadow-sm">
-                         <img src={`https://nftia.infura-ipfs.io/ipfs/${nft.ipfsHash}`} className="card-img-top" alt="..."></img>
-                         <div className="card-body bg-dark">
-                             <h5 className="card-title">{nft.metadata.name}</h5>
-                                 <p className="card-text">Card TEXT</p>
-                             <div className="d-flex justify-content-between align-items-center">
-                                 <div className="btn-group"> 
-                                 <input type="text" onChange={(e) => setPrice(parseFloat(e.target.value).toFixed(2))} onFocus={(e) => setId(nft.id)} />
-                                 <button className="btn btn-sm btn-outline-success" onClick={() => listForSale()}>List</button>
-                                 <button className="btn btn-sm btn-outline-danger" onClick={() => unlistFromSale()}>UnList</button>
-                                 </div>
-                                 <small className="text-muted">Is Listed?</small>
-                             </div>
-                         </div>
+                          <img src={`https://nftia.infura-ipfs.io/ipfs/${nft.ipfsHash}`} className="card-img-top" alt="..."></img>
+                          <div className="card-body bg-dark">
+                            <h4 className="card-title">{nft.metadata.name}</h4>
+                            <p className="card-text">Card TEXT</p>
+
+                            <div className="row">
+                              <div className="col-md-12 mb-3 mx-auto">
+                                <label htmlFor="inputField" className="form-label">Price</label>
+                                <input type="text" className="form-control form-control-sm" onChange={(e) => setPrice(parseFloat(e.target.value).toFixed(2))} placeholder="Set a price number. Ex: 9.34"/>
+                              </div>
+                            </div>
+
+
+                            <div className="row">
+                              <div className="col-md-6">
+                                <button className="btn btn-outline-secondary btn-sm w-100" type="button" onClick={() => listForSale(nft.id, nft.ipfsHash)}>List For Sale</button>
+                              </div>
+                              <div className="col-md-6">
+                                <button className="btn btn-outline-secondary btn-sm w-100" type="button" onClick={() => unlistFromSale(nft.id, nft.ipfsHash)}>UnList For Sale</button>
+                              </div>
+                            </div>
+
+
+                          </div>
+
+
+                          <div class="card-footer bg-dark">
+                          <small class="text-muted">Share on Social</small>
+                            <PostTemplate imageUrl={ `https://nftia.infura-ipfs.io/ipfs/${nft.ipfsHash}`} />
+                        </div>
                      </div>
                  </div>
              ))}

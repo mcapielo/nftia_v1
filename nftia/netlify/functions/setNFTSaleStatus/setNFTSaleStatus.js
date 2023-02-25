@@ -15,10 +15,10 @@ const handler = async (event) => {
 
   try {
     const { address } = JSON.parse(event.body);
-    const { name } = JSON.parse(event.body);
-    const { prompt } = JSON.parse(event.body);
-    const { trxid } = JSON.parse(event.body);
     const { hash } = JSON.parse(event.body);
+    const { nftPrice } = JSON.parse(event.body);
+    const { setOnSaleStatus } = JSON.parse(event.body);
+
 
     if (!address) {
       return errorGen('Missing Input');
@@ -27,10 +27,28 @@ const handler = async (event) => {
     const collection = database.collection(process.env.MONGODB_COLLECTION);
     const currentDate = new Date();
 
-    const filter = { _id: address };
-    const update =   { $inc: { NFTCounter : 1 }, $set: { lastTime: currentDate },   $push: { NFTCollection: { name: name , prompt: prompt, trxid: trxid, hash: hash, price: 0, forSale: false }}  };
-    const options = { upsert: false, new: false };
-    const result = await collection.findOneAndUpdate(filter, update, options);
+    const query = {
+      _id: address,
+      NFTCollection: {
+        $elemMatch: {
+          hash: hash
+        }
+      }
+    };
+    
+    const update = {
+      $set: {
+        lastTime: currentDate,
+        'NFTCollection.$.price': nftPrice,
+        'NFTCollection.$.forSale' : setOnSaleStatus,
+      }
+    };
+    
+    const options = {
+      returnOriginal: false
+    };
+        
+    const result = await collection.findOneAndUpdate(query, update, options);
     if (result){
       return {
         statusCode: 200,
@@ -46,4 +64,5 @@ const handler = async (event) => {
 }
 
 module.exports = { handler }
+
 

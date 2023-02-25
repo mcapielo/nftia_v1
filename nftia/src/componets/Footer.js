@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import UserMessage from './UserMessage'
 
+
 const Footer = () => {
 
   const [emailSub, setEmailSub] = useState();
@@ -31,6 +32,7 @@ const Footer = () => {
     }
   
   }
+
 
   return (
     <div className="container py-4 my-4 border-top">
@@ -87,9 +89,11 @@ const Footer = () => {
           <div className="d-flex flex-column flex-sm-row justify-content-between py-4 my-4 border-top">
             <p>&copy; 2023 NFTIA, Inc. All rights reserved.</p>
             <ul className="list-unstyled d-flex">
-              <li className="ms-3"><a className="link-dark" href="/"></a></li>
-              <li className="ms-3"><a className="link-dark" href="/"></a></li>
-              <li className="ms-3"><a className="link-dark" href="/"></a></li>
+              <li className="ms-3"><a className="link-dark" href="/"></a><i className="bi bi-facebook text-white"></i></li>
+              <li className="ms-3"><a className="link-dark" href="/"></a><i className="bi bi-twitter text-white"></i></li>
+              <li className="ms-3"><a className="link-dark" href="/"></a><i className="bi bi-instagram text-white"></i></li>
+              <li className="ms-3"><a className="link-dark" href="/"></a><i className="bi bi-linkedin text-white"></i></li>
+              <li className="ms-3"><a className="link-dark" href="/"></a><i className="bi bi-youtube text-white"></i></li>
             </ul>
           </div>
         </footer>

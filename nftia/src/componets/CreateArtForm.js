@@ -12,6 +12,8 @@ const CreateArtForm = ({user}) => {
   
   const [nameOfNFT, setNameOfNFT ] = useState('');
   const [nft_prompt, setNFTPrompt] = useState('');
+  const [loading_mint_button, setLoadingMintButton] = useState(false);
+
 
   //OPEN IA SET UP.
  const configuration = new Configuration({
@@ -40,6 +42,8 @@ const client = ipfsClient.create({
   const mint = async () => {
     try {
 
+      //Activate Spinner.
+      setLoadingMintButton(true);
       console.log("INPUT PROMT", nft_prompt);
 
       // Moderation
@@ -88,7 +92,7 @@ const client = ipfsClient.create({
                 let nft <- NFTIA.createToken(ipfsHash: ipfsHash, metadata: {"name": name})
                 collection.deposit(token: <- nft)
               }
-            
+              
               execute {
                 log("A user minted an NFT into their account")
               }
@@ -103,9 +107,10 @@ const client = ipfsClient.create({
         console.log("https://testnet.flowscan.org/transaction/"+MintTRXId+"/events")
         
         const Minttransaction = await fcl.tx(MintTRXId).onceSealed();
-        console.log(Minttransaction);
+        console.log("here i have to take the id of the nft", Minttransaction);
         if (Minttransaction) {
-          AddNftToCollection(nameOfNFT, nft_prompt, MintTRXId, hash );
+          AddNftToCollection('changeme',nameOfNFT, nft_prompt, MintTRXId, hash );
+          setLoadingMintButton(false);
           //NEED TO REFRESH ALBUM.
         }
         return Minttransaction;
@@ -166,8 +171,17 @@ const client = ipfsClient.create({
                     <input type="text" className="form-control" id="setNFTPrompt" onChange={(e) => setNFTPrompt(e.target.value)}/>
                     <label className="text-dark" for="setNFTPrompt">Please Write your art description, Ex: "little white sad cat sitting on a table with an apple" </label>
                 </div>
+
+
+                {loading_mint_button ? 
+                  <button class="btn btn-outline-info btn-lg btn-block" type="button" disabled>
+                  <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                  Creating Art...
+                </button> 
+                :
                 <button className="btn btn-outline-info btn-lg btn-block" onClick={() => mint()}>Create Art</button>
-            </div>
+                }
+              </div>
             <br/>
             <hr className="text-white"/>
         </div>

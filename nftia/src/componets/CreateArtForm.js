@@ -40,7 +40,7 @@ const CreateArtForm = ({user}) => {
    
     
 
-    // MINT NFT - CADENCE SCRIPT -> Should be a lambda
+  // MINT NFT - CADENCE SCRIPT -> Should be a lambda
   const mint = async () => {
     try {
       if (nameOfNFT === '' || nft_prompt === '') {
@@ -111,8 +111,12 @@ const CreateArtForm = ({user}) => {
             
             const Minttransaction = await fcl.tx(MintTRXId).onceSealed();
             console.log("here i have to take the id of the nft", Minttransaction);
-            if (Minttransaction) {
-              AddNftToCollection(nameOfNFT, nft_prompt, MintTRXId, hash);
+            if (Minttransaction.statusString === "SEALED") {
+              const id = Minttransaction.events[0].data.id;
+              console.log(id);
+              AddNftToCollection(id, nameOfNFT, nft_prompt, MintTRXId, hash);
+              document.getElementById("setNameOfNFT").value = "";
+              document.getElementById("setNFTPrompt").value = "";
               setNameOfNFT('');
               setNFTPrompt('');
               setLoadingMintButton(false);
@@ -128,7 +132,7 @@ const CreateArtForm = ({user}) => {
     }
   }
 
-  const AddNftToCollection = async (name, prompt, trxid, hash) => {
+  const AddNftToCollection = async (id, name, prompt, trxid, hash) => {
     
     let returning_value = false;
 
@@ -140,6 +144,7 @@ const CreateArtForm = ({user}) => {
         },
         body: JSON.stringify({
             address: user.addr,
+            id, id,
             name: name,
             prompt: prompt,
             trxid: trxid,
@@ -189,9 +194,9 @@ const CreateArtForm = ({user}) => {
                   <button className="btn btn-outline-info btn-lg btn-block" type="button" disabled>
                   <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                   Creating Art...
-                </button> 
+                  </button> 
                 :
-                <button className="btn btn-outline-info btn-lg btn-block" onClick={() => mint()}>Create Art</button>
+                  <button className="btn btn-outline-info btn-lg btn-block" onClick={() => mint()}>Create Art</button>
                 }
               </div>
             <br/>

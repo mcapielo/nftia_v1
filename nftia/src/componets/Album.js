@@ -7,9 +7,12 @@ import PostTemplate from './PostTemplate';
 const Album = ({ user }) => {
 
     const [nfts, setNFTs] = useState([]);
-    const [price, setPrice] = useState();
+    const [price, setPrice] = useState(0);
+    const [errorListMessage, setErrorListMessage] = useState(null);
+    const [showListSpinner, setShowListSpinner] = useState(null);
 
-    const setNFTSaleStatus =  async (id, hash, price, forSale) => {
+
+    const setNFTSaleStatus =  async (hash, price, forSale) => {
     
       let returning_value = false;
 
@@ -45,46 +48,53 @@ const Album = ({ user }) => {
 
     // Put a link of the NFT on the SALECOLLECTION - CADENCE SCRIPT -> Should be a lambda
     const listForSale = async (id, hash) => {
-    
-      console.log("ID", id);
-      console.log("hash", hash);
-      console.log("PRICE", price);
-      try{
-        const listForSaleTRXId = await fcl.mutate({
-          cadence: `
-            import NFTIAMarketPlace from 0x19e6fc6fdfde98d5
-        
-                transaction(id: UInt64, price: UFix64)  {
-        
-                    prepare(acct: AuthAccount) {
-                      let saleCollection = acct.borrow<&NFTIAMarketPlace.SaleCollection>(from: /storage/NFTIASaleCollection)
-                                            ?? panic("This SaleCollection does not exist")
-                      saleCollection.listForSale(id: id, price: price)                      
-                    }
-        
-                    execute {
-                    log("A user listed an NFT Sale")
-                    }
-                }
-            `
-          ,
-          args: (arg, t) =>[arg(parseInt(id), t.UInt64 ),arg(price, t.UFix64)],
-          proposer: fcl.authz,
-          payer: fcl.authz,
-          authorization: [fcl.authz],
-          limit: 9999,
-        });
-        
-        console.log("https://testnet.flowscan.org/transaction/"+listForSaleTRXId+"/events")
-        const ListForSaleTransaction = await fcl.tx(listForSaleTRXId).onceSealed();
-        console.log("DONE TRX", ListForSaleTransaction);
-        if (ListForSaleTransaction) {
-          setNFTSaleStatus(id, hash, price, true);
-        }
-        return ListForSaleTransaction;
-      } catch (error) {
-        console.log("Error Making TRX - List NFT For Sale:", error);
-      }
+
+      if (!(typeof price === 'number' && !isNaN(price) && price > 0)) {
+        setErrorListMessage('Please put a price for your NFT');
+        return false;
+      } else {
+          if (window.confirm('Are you sure you want to put on Sale a NFT?')) {
+            setShowListSpinner(true);
+            try{
+              const listForSaleTRXId = await fcl.mutate({
+                cadence: `
+                  import NFTIAMarketPlace from 0x19e6fc6fdfde98d5
+              
+                      transaction(id: UInt64, price: UFix64)  {
+              
+                          prepare(acct: AuthAccount) {
+                            let saleCollection = acct.borrow<&NFTIAMarketPlace.SaleCollection>(from: /storage/NFTIASaleCollection)
+                                                  ?? panic("This SaleCollection does not exist")
+                            saleCollection.listForSale(id: id, price: price)                      
+                          }
+              
+                          execute {
+                          log("A user listed an NFT Sale")
+                          }
+                      }
+                  `
+                ,
+                args: (arg, t) =>[arg(parseInt(id), t.UInt64 ),arg(price, t.UFix64)],
+                proposer: fcl.authz,
+                payer: fcl.authz,
+                authorization: [fcl.authz],
+                limit: 9999,
+              });
+              
+              console.log("https://testnet.flowscan.org/transaction/"+listForSaleTRXId+"/events")
+              const ListForSaleTransaction = await fcl.tx(listForSaleTRXId).onceSealed();
+              console.log("DONE TRX", ListForSaleTransaction);
+              if (ListForSaleTransaction) {
+                setNFTSaleStatus(hash, price, true);
+                setShowListSpinner(false);
+              }
+              return ListForSaleTransaction;
+            } catch (error) {
+              console.log("Error Making TRX - List NFT For Sale:", error);
+            }
+          
+          }
+      } 
     }
 
     // Take out the link of the NFT on the SALECOLLECTION - CADENCE SCRIPT -> Should be a lambda
@@ -119,7 +129,7 @@ const Album = ({ user }) => {
         const unListFromSaleTransaction = await fcl.tx(unListFromSaleTRXId).onceSealed();
         console.log("DONE TRX", unListFromSaleTransaction);
         if (unListFromSaleTransaction) {
-          setNFTSaleStatus(id, hash, 0, false);
+          setNFTSaleStatus(hash, 0, false);
         }
         return unListFromSaleTransaction;
       } catch (error) {
@@ -199,8 +209,8 @@ const Album = ({ user }) => {
                           </div>
 
 
-                          <div class="card-footer bg-dark">
-                          <small class="text-muted">Share on Social</small>
+                          <div className="card-footer bg-dark">
+                            <small className="text-muted">Share on Social</small>
                             <PostTemplate imageUrl={ `https://nftia.infura-ipfs.io/ipfs/${nft.ipfsHash}`} />
                         </div>
                      </div>

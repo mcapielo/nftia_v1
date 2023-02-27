@@ -15,7 +15,7 @@ const handler = async (event) => {
 
   try {
     const { address } = JSON.parse(event.body);
-    const { hash } = JSON.parse(event.body);
+    const { id } = JSON.parse(event.body);
     const { nftPrice } = JSON.parse(event.body);
     const { setOnSaleStatus } = JSON.parse(event.body);
 
@@ -31,7 +31,7 @@ const handler = async (event) => {
       _id: address,
       NFTCollection: {
         $elemMatch: {
-          hash: hash
+          id: id
         }
       }
     };

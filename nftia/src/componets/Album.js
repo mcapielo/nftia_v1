@@ -2,17 +2,20 @@ import React, { useState, useEffect } from 'react';
 import * as fcl from "@onflow/fcl";
 import * as t from "@onflow/types";
 import PostTemplate from './PostTemplate';
+import './Album.css';
 
 
 const Album = ({ user }) => {
 
     const [nfts, setNFTs] = useState([]);
     const [price, setPrice] = useState(0);
-    const [errorListMessage, setErrorListMessage] = useState(null);
     const [showListSpinner, setShowListSpinner] = useState(null);
+    const [showUnListSpinner, setShowUnListSpinner] = useState(null);
+
+    
 
 
-    const setNFTSaleStatus =  async (hash, price, forSale) => {
+    const setNFTSaleStatus =  async (id, price, forSale) => {
     
       let returning_value = false;
 
@@ -24,7 +27,7 @@ const Album = ({ user }) => {
         },
         body: JSON.stringify({
             address: user.addr,
-            hash: hash,
+            id: id,
             nftPrice: price,
             setOnSaleStatus: forSale
           })
@@ -34,7 +37,6 @@ const Album = ({ user }) => {
         .then(response => response.json())
         .then(data => {
           console.log("setNFTSaleStatus response api", data);
-          //returning_value =  {"ok": data.ok, "AccountSetUp": data.value?.AccountSetUp? data.value.AccountSetUp : false};
         })
         .catch((error) => {
             // This function will be called if the Promise is rejected with an error
@@ -47,13 +49,15 @@ const Album = ({ user }) => {
     }
 
     // Put a link of the NFT on the SALECOLLECTION - CADENCE SCRIPT -> Should be a lambda
-    const listForSale = async (id, hash) => {
+    const listForSale = async (id) => {
+      console.log("id for listing", id);
+      console.log("price", price);
 
-      if (!(typeof price === 'number' && !isNaN(price) && price > 0)) {
-        setErrorListMessage('Please put a price for your NFT');
+      if (!(typeof price === 'string' && !isNaN(parseFloat(price)) && parseFloat(price) > 0)) {
+        window.confirm('Price should be a number greater than 0.');
         return false;
       } else {
-          if (window.confirm('Are you sure you want to put on Sale a NFT?')) {
+          if (window.confirm('Are you sure you want to LIST a NFT?')) {
             setShowListSpinner(true);
             try{
               const listForSaleTRXId = await fcl.mutate({
@@ -85,7 +89,7 @@ const Album = ({ user }) => {
               const ListForSaleTransaction = await fcl.tx(listForSaleTRXId).onceSealed();
               console.log("DONE TRX", ListForSaleTransaction);
               if (ListForSaleTransaction) {
-                setNFTSaleStatus(hash, price, true);
+                setNFTSaleStatus(id, price, true);
                 setShowListSpinner(false);
               }
               return ListForSaleTransaction;
@@ -98,40 +102,46 @@ const Album = ({ user }) => {
     }
 
     // Take out the link of the NFT on the SALECOLLECTION - CADENCE SCRIPT -> Should be a lambda
-    const unlistFromSale = async (id, hash) => {
+    const unlistFromSale = async (id) => {
+      
       try{
-        const unListFromSaleTRXId = await fcl.mutate({
-          cadence: `
-            import NFTIAMarketPlace from 0x19e6fc6fdfde98d5
+        if (window.confirm('Are you sure you want to UNLIST a NFT?')) {
+          setShowUnListSpinner(true);
+
+          const unListFromSaleTRXId = await fcl.mutate({
+            cadence: `
+              import NFTIAMarketPlace from 0x19e6fc6fdfde98d5
+          
+                  transaction(id: UInt64)  {
+          
+                      prepare(acct: AuthAccount) {
+                        let saleCollection = acct.borrow<&NFTIAMarketPlace.SaleCollection>(from: /storage/NFTIASaleCollection)
+                                              ?? panic("This SaleCollection does not exist")
+                        saleCollection.unlistFromSale(id: id)                     
+                      }
+          
+                      execute {
+                      log("A user listed an NFT Sale")
+                      }
+                  }
+              `
+            ,
+            args: (arg, t) =>[arg(parseInt(id), t.UInt64 )],
+            proposer: fcl.authz,
+            payer: fcl.authz,
+            authorization: [fcl.authz],
+            limit: 9999,
+          });
         
-                transaction(id: UInt64)  {
-        
-                    prepare(acct: AuthAccount) {
-                      let saleCollection = acct.borrow<&NFTIAMarketPlace.SaleCollection>(from: /storage/NFTIASaleCollection)
-                                            ?? panic("This SaleCollection does not exist")
-                      saleCollection.unlistFromSale(id: id)                     
-                    }
-        
-                    execute {
-                    log("A user listed an NFT Sale")
-                    }
-                }
-            `
-          ,
-          args: (arg, t) =>[arg(parseInt(id), t.UInt64 )],
-          proposer: fcl.authz,
-          payer: fcl.authz,
-          authorization: [fcl.authz],
-          limit: 9999,
-        });
-        
-        console.log("https://testnet.flowscan.org/transaction/"+unListFromSaleTRXId+"/events")
-        const unListFromSaleTransaction = await fcl.tx(unListFromSaleTRXId).onceSealed();
-        console.log("DONE TRX", unListFromSaleTransaction);
-        if (unListFromSaleTransaction) {
-          setNFTSaleStatus(hash, 0, false);
-        }
-        return unListFromSaleTransaction;
+          console.log("https://testnet.flowscan.org/transaction/"+unListFromSaleTRXId+"/events")
+          const unListFromSaleTransaction = await fcl.tx(unListFromSaleTRXId).onceSealed();
+          console.log("DONE TRX", unListFromSaleTransaction);
+          if (unListFromSaleTransaction) {
+            setNFTSaleStatus(id, 0, false);
+            setShowUnListSpinner(false);
+          }
+          return unListFromSaleTransaction;
+        }   
       } catch (error) {
         console.log("Error Making TRX - UnList NFT From Sale:", error);
       }
@@ -188,23 +198,40 @@ const Album = ({ user }) => {
                             <h4 className="card-title">{nft.metadata.name}</h4>
                             <p className="card-text">Card TEXT</p>
 
-                            <div className="row">
-                              <div className="col-md-12 mb-3 mx-auto">
-                                <label htmlFor="inputField" className="form-label">Price</label>
-                                <input type="text" className="form-control form-control-sm" onChange={(e) => setPrice(parseFloat(e.target.value).toFixed(2))} placeholder="Set a price number. Ex: 9.34"/>
-                              </div>
+                            
+                            <h6>Price</h6>                           
+                            <div className="input-group mb-3">
+                              <input id="inputPrice" type="number" className="form-control" aria-label="Price for NFT" onChange={(e) => setPrice( parseFloat(e.target.value).toFixed(6) ) } placeholder="Set your Art Price. Ex: 9.34"/>
+                              <span className="input-group-text bg-white">
+                              <img src="/images/flow.png" className="img-fluid flow-icon" alt="Flow Logo"></img>
+                              </span> 
                             </div>
 
 
+                            
                             <div className="row">
                               <div className="col-md-6">
-                                <button className="btn btn-outline-secondary btn-sm w-100" type="button" onClick={() => listForSale(nft.id, nft.ipfsHash)}>List For Sale</button>
+                                {showListSpinner ? 
+                                  <button className="btn btn-outline-secondary btn-sm w-100" type="button" disabled>
+                                    <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                    Listing for Sale...
+                                  </button> 
+                                :
+                                  <button className="btn btn-outline-secondary btn-sm w-100" type="button" onClick={() => listForSale(nft.id)}>List For Sale</button>
+                                 } 
                               </div>
                               <div className="col-md-6">
-                                <button className="btn btn-outline-secondary btn-sm w-100" type="button" onClick={() => unlistFromSale(nft.id, nft.ipfsHash)}>UnList For Sale</button>
+
+                              {showUnListSpinner ? 
+                                  <button className="btn btn-outline-secondary btn-sm w-100" type="button" disabled>
+                                    <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                    UnListing for Sale...
+                                  </button> 
+                                :
+                                  <button className="btn btn-outline-secondary btn-sm w-100" type="button" onClick={() => unlistFromSale(nft.id)}>UnList For Sale</button>
+                                 } 
                               </div>
                             </div>
-
 
                           </div>
 

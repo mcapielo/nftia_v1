@@ -175,7 +175,7 @@ const CreateArtForm = ({user}) => {
                 <h1 className="text-white">Would you like to make some Art?</h1>
                 <br></br>
                 {errorMessage &&   
-                  <div className={`alert alert-danger alert-dismissible fade show`} role="alert">
+                  <div className='alert alert-danger alert-dismissible fade show' role="alert">
                       {errorMessage}
                       <button type="button" className="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                   </div>

@@ -1,10 +1,10 @@
 import React from 'react';
 import SaleCollections from '../componets/SaleCollections';
 
-const MarketPlace = () => {
+const MarketPlace = ({ user }) => {
   return (
     <div>
-      <SaleCollections />
+      <SaleCollections user={user} />
     </div>
   );
 };

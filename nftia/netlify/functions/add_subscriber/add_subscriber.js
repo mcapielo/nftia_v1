@@ -23,7 +23,9 @@ exports.handler = async (event) => {
     };
     
     const dc = "us13"
-    const creds = 'any:5a6936ee94e379fcbd939ae974be3f56-us13';
+
+    const token = process.env.MAILCHIMP_KEY
+    const creds = 'any:'+token+'-us13';
     const response = await fetch(
       'https://us13.api.mailchimp.com/3.0/lists/89fd13d64d/members/',
       {

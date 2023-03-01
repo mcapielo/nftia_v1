@@ -80,7 +80,7 @@ const Footer = () => {
                 </div>
               </form>
               <br></br>
-              <p className='text-muted'>You could also contact by email to: <a className='text-info text-decoration-none'>nftia@gmail.com</a>.</p>
+              <p className='text-muted'>You could also contact by email to: <a className='text-info text-decoration-none'>nftia0x01@gmail.com</a>.</p>
                   <UserMessage variant="info" message="Thank you, Now you are subscribed!" triggerAlert={showAlert} />
             </div>
           </div>

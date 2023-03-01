@@ -38,13 +38,87 @@ const CreateArtForm = ({user}) => {
     },
   });
    
+  const AddNftToCollection = async (id, name, prompt, trxid, hash) => {
     
+    let returning_value = false;
+
+      const config = {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            address: user.addr,
+            id, id,
+            name: name,
+            prompt: prompt,
+            trxid: trxid,
+            hash: hash
+          })
+        }
+  
+        const add_user_nft =  await fetch('/api/add_user_nft', config)
+        .then(response => response.json())
+        .then(data => {
+          console.log("flag user response api", data);
+          //returning_value =  {"ok": data.ok, "AccountSetUp": data.value?.AccountSetUp? data.value.AccountSetUp : false};
+        })
+        .catch((error) => {
+            // This function will be called if the Promise is rejected with an error
+            console.error("There was an error:", error);
+        });  
+
+      return returning_value;
+  }
+
+  const getUser = async () => {
+
+    let response_return = false;
+    
+    const config = {
+      method: 'POST',
+      headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        c_a: user.addr
+        })
+      }
+
+      const _userApi =  await fetch('/api/get_user', config)
+      .then(response => response.json())
+      .then(data => {
+        console.log("User response api", data);
+        return response_return = data;
+      })
+      .catch((error) => {
+          // This function will be called if the Promise is rejected with an error
+          console.error("There was an error:", error);
+      });  
+      return response_return
+
+  }
 
   // MINT NFT - CADENCE SCRIPT -> Should be a lambda
   const mint = async () => {
     try {
+      
+      const _user = await getUser()
+
+      if(!_user) {
+        setErrorMessage('Hold On, something went Wrong, try again.');
+        return false;
+      }
+      
+      if (_user.NFTCounter === 1) {
+        setErrorMessage('You Reach - 1 Art Created - Limit for Now, Stay Tunned');
+        return false;
+      }
+     
       if (nameOfNFT === '' || nft_prompt === '') {
-        setErrorMessage('Please enter text in both input fields');
+        setErrorMessage('You Art needs a Name and Description.');
         return false;
       } else {
         if (window.confirm(`Are you sure you want to Mint an NFT with Name: ${nameOfNFT} and Description: ${nft_prompt}?`)) {
@@ -61,7 +135,8 @@ const CreateArtForm = ({user}) => {
           const isFlagged = moderation_response["data"]["results"][0].flagged
 
           if (isFlagged) {
-            setErrorMessage('Please rewrite your Description - No violence and adult content is allow');
+            setErrorMessage('Please Rewrite Your Art Description - Violence, Adult or Hate Content Is NOT Allow');
+            setLoadingMintButton(false);
             return false
           }
 
@@ -110,16 +185,15 @@ const CreateArtForm = ({user}) => {
             console.log("https://testnet.flowscan.org/transaction/"+MintTRXId+"/events")
             
             const Minttransaction = await fcl.tx(MintTRXId).onceSealed();
-            console.log("here i have to take the id of the nft", Minttransaction);
             if (Minttransaction.statusString === "SEALED") {
               const id = Minttransaction.events[0].data.id;
-              console.log(id);
               AddNftToCollection(id, nameOfNFT, nft_prompt, MintTRXId, hash);
               document.getElementById("setNameOfNFT").value = "";
               document.getElementById("setNFTPrompt").value = "";
               setNameOfNFT('');
               setNFTPrompt('');
               setLoadingMintButton(false);
+              setErrorMessage('Your Beautiful Art Is On The Way, Please Hold On.');
             }
             return Minttransaction;
           } catch (error) {
@@ -132,77 +206,41 @@ const CreateArtForm = ({user}) => {
     }
   }
 
-  const AddNftToCollection = async (id, name, prompt, trxid, hash) => {
-    
-    let returning_value = false;
-
-      const config = {
-        method: 'POST',
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            address: user.addr,
-            id, id,
-            name: name,
-            prompt: prompt,
-            trxid: trxid,
-            hash: hash
-          })
-        }
-  
-        const add_user_nft =  await fetch('/api/add_user_nft', config)
-        .then(response => response.json())
-        .then(data => {
-          console.log("flag user response api", data);
-          //returning_value =  {"ok": data.ok, "AccountSetUp": data.value?.AccountSetUp? data.value.AccountSetUp : false};
-        })
-        .catch((error) => {
-            // This function will be called if the Promise is rejected with an error
-            console.error("There was an error:", error);
-        });  
-
-      return returning_value;
-  }
-
-
-    return (
-        <div className='container'>
-            <br/>
-            <hr className="text-white" />
-            <div className="container text-center">
-                <h1 className="text-white">Would you like to make some Art?</h1>
-                <br></br>
-                {errorMessage &&   
-                  <div className='alert alert-danger alert-dismissible fade show' role="alert">
-                      {errorMessage}
-                      <button type="button" className="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                  </div>
-                }
-                <div className="form-floating mb-3">
-                    <input type="text" className="form-control" id="setNameOfNFT" onChange={(e) => setNameOfNFT(e.target.value)}  onFocus={(e) => setErrorMessage(null)}/>
-                    <label className="text-dark" for="setNameOfNFT">Give A Name To Your Art, Ex: "My little Tomas"</label>
+  return (
+      <div className='container'>
+          <br/>
+          <hr className="text-white" />
+          <div className="container text-center">
+              <h1 className="text-white">Would you like to make Art?</h1>
+              <br></br>
+              {errorMessage &&   
+                <div className='alert alert-info fade show' role="alert">
+                    {errorMessage}
                 </div>
-                <div className="form-floating mb-3">
-                    <input type="text" className="form-control" id="setNFTPrompt" onChange={(e) => setNFTPrompt(e.target.value)} onFocus={(e) => setErrorMessage(null)}/>
-                    <label className="text-dark" for="setNFTPrompt">Please Write your art description, Ex: "little white sad cat sitting on a table with an apple" </label>
-                </div>
-
-
-                {loading_mint_button ? 
-                  <button className="btn btn-outline-info btn-lg btn-block" type="button" disabled>
-                  <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                  Creating Art...
-                  </button> 
-                :
-                  <button className="btn btn-outline-info btn-lg btn-block" onClick={() => mint()}>Create Art</button>
-                }
+              }
+              <div className="form-floating mb-3">
+                  <input type="text" className="form-control" id="setNameOfNFT" onChange={(e) => setNameOfNFT(e.target.value)}  onFocus={(e) => setErrorMessage(null)}/>
+                  <label className="text-dark" for="setNameOfNFT">Give A Name To Your Art, Ex: "My happy Emma"</label>
               </div>
-            <br/>
-            <hr className="text-white"/>
-        </div>
-    );
+              <div className="form-floating mb-3">
+                  <input type="text" className="form-control" id="setNFTPrompt" onChange={(e) => setNFTPrompt(e.target.value)} onFocus={(e) => setErrorMessage(null)}/>
+                  <label className="text-dark" for="setNFTPrompt">Write your Art Description, Ex: "happy golden dog on a field with cherry blossom trees" </label>
+              </div>
+
+
+              {loading_mint_button ? 
+                <button className="btn btn-outline-info btn-lg btn-block" type="button" disabled>
+                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                Creating Art...
+                </button> 
+              :
+                <button className="btn btn-outline-info btn-lg btn-block" onClick={() => mint()}>Create Art</button>
+              }
+            </div>
+          <br/>
+          <hr className="text-white"/>
+      </div>
+  );
 };
 
 export default CreateArtForm;

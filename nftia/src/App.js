@@ -10,6 +10,7 @@ import Workshop from "./pages/Workshop";
 import NotFound from "./pages/NotFound";
 import Header from "./componets/Header";
 import Footer from "./componets/Footer";
+import Blog_ia_art_nft_how_it_works from "./pages/blog/ia-art-nft-how-it-works"
 
 
 
@@ -31,12 +32,13 @@ fcl.config({
 
 
   return (
-    <div className="App">
+    <div className="App container-fluid">
       <Header user={user}/>
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/marketplace" element={<MarketPlace user={user} />} />
         <Route path="/workshop" element={<Workshop user={user} />} />
+        <Route path="/blog/ia-art-nft-how-it-works" element={<Blog_ia_art_nft_how_it_works />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       <Footer />

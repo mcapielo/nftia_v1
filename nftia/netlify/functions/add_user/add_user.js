@@ -24,7 +24,7 @@ const handler = async (event) => {
     const currentDate = new Date();
 
     const filter = { _id: address };
-    const update = {  $setOnInsert: { NFTCounter: 0, AccountSetUp: false}, $set: { lastTime: currentDate } };
+    const update = {  $setOnInsert: { NFTCounter: 0, AccountSetUp: false, NFTCollection: []}, $set: { lastTime: currentDate } };
     const options = { upsert: true, new: true, setDefaultsOnInsert: true };
     const result = await collection.findOneAndUpdate(filter, update, options);
     if (result){

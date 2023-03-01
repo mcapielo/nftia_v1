@@ -18,7 +18,7 @@ const PostTemplate = ({ imageUrl }) => {
   // Instagram post function
   const postToInstagram = () => {
     // Instagram does not provide a public API for posting images, so you will need to handle this in a different way
-    console.log("Instagram does not provide a public API for posting images");
+    console.log("Not yet. Will Soon.");
   };
 
   // LinkedIn post function

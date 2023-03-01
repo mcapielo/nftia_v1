@@ -1,5 +1,3 @@
-
-
 .Header-logo {
   height: 40vmin;
   pointer-events: none;
@@ -33,6 +31,18 @@
     transform: rotate(360deg);
   }
 }
+
+
+.blinking {
+  animation: blinker 0.8s linear infinite;
+}
+
+@keyframes blinker {
+  50% {
+    opacity: 0;
+  }
+}
+
 
 @media (prefers-reduced-motion: no-preference) {
   .Header-logo {

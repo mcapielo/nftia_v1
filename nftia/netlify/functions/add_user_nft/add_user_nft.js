@@ -29,7 +29,7 @@ const handler = async (event) => {
     const currentDate = new Date();
 
     const filter = { _id: address };
-    const update =   { $inc: { NFTCounter : 1 }, $set: { lastTime: currentDate },   $push: { NFTCollection: { id: id, name: name , prompt: prompt, trxid: trxid, hash: hash, price: 0, forSale: false }}  };
+    const update =   { $inc: { NFTCounter : 1 }, $set: { lastTime: currentDate },   $push: { NFTCollection: { id: id, name: name , prompt: prompt, trxid: trxid, hash: hash, price: "0", forSale: false }}  };
     const options = { upsert: false, new: false };
     const result = await collection.findOneAndUpdate(filter, update, options);
     if (result){

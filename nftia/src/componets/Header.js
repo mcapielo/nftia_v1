@@ -5,12 +5,10 @@ import './Header.css';
 import UserMessage from './UserMessage'
 
 
-
 const Header = ({ user }) => {
 
     const [loading_auth_button, setLoadingAuthButton] = useState(false);
     const [showSetupUserAlert, setShowSetupUserAlert] = useState(false);
-
 
     const navigate = useNavigate();
 
@@ -78,6 +76,10 @@ const Header = ({ user }) => {
       setLoadingAuthButton(true);
       fcl.authenticate()
       .then((response) => {
+        if (!response.addr) {
+          setLoadingAuthButton(false);
+          return false;
+        }
         console.log("Response from Login", response);
           AddUserApiCall(response.addr)
           .then((data) => {
@@ -187,11 +189,11 @@ const Header = ({ user }) => {
         <div>
            {loading_auth_button ? 
            <button class="btn btn-outline-info btn-lg btn-block" type="button" disabled>
-                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
                 Authenticating...
               </button> 
            : 
-            <button className="btn btn-outline-info btn-lg btn-block" onClick={LogIn}>Sign InUp</button>           
+            <button className="btn btn-outline-info btn-lg btn-block" id="signInUpButton" onClick={LogIn}>Sign to Enter</button>           
            }
         </div>
       )

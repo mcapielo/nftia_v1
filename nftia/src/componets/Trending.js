@@ -1,13 +1,24 @@
 import './Trending.css';
+import { useNavigate } from 'react-router-dom';
+
 
 const Trending = () => {
+
+    const navigate = useNavigate();
+    
+    const goToLogIn = () => {
+        window.scrollTo(0, 0);
+        const button = document.getElementById("signInUpButton");
+        button.classList.add('blinking');
+    }
+
 
     return (
 
     <div className="container">
         <hr></hr>
         <br/>
-        <h1>Trending</h1>
+        <h1>Featured Art</h1>
         <br/>
         <br/>
         <div id="myCarousel" className="carousel slide" data-bs-ride="carousel">
@@ -18,32 +29,32 @@ const Trending = () => {
             </div>
             <div className="carousel-inner">
                 <div className="carousel-item active">
-                    <img src="https://nftia.infura-ipfs.io/ipfs/QmQ4xNWKnFJ7tfJmtNwjXtacRqHFzmoe5Lk9oXTApEjHgk" alt="FirstArtCreation" className="imgTrending"/>
+                    <img src="/images/featured_3.jpg" alt="FirstArtCreation" className="imgTrending"/>
                     <div className="container">
                         <div className="carousel-caption text-start">
-                            <h1>Example headline.</h1>
-                            <p>Some representative placeholder content for the first slide of the carousel.</p>
-                            <p><a className="btn btn-lg btn-primary" href="/">Sign up today</a></p>
+                            <h1 className="fw-bold">New Way to Make Art.</h1>
+                            <p className="fw-bold">Unleash your creativity, create Digital Art.</p>
+                            <p><a className="btn btn-lg btn-outline-light" href="#" onClick={() => goToLogIn()} >Sign up today</a></p>
                         </div>
                     </div>
                 </div>
                 <div className="carousel-item">
-                    <img src="https://nftia.infura-ipfs.io/ipfs/QmdnbtMxKRrGJ6GpqkU46JtGfH3sgWEyhZi2tT4XAsRNLv" alt="SecondArtCreation" className="imgTrending"/>
+                    <img src="/images/featured_1.jpg" alt="SecondArtCreation" className="imgTrending"/>
                     <div className="container">
                         <div className="carousel-caption">
-                            <h1>Another example headline.</h1>
-                            <p>Some representative placeholder content for the second slide of the carousel.</p>
-                            <p><a className="btn btn-lg btn-primary" href="/">Learn more</a></p>
+                            <h1 className="text-white fw-bold">Unlimited Creativity.</h1>
+                            <p className="text-white fw-bold">Experience the joy of creating, share your unique perspective, and make a lasting impact.</p>
+                            <p><a className="btn btn-lg btn-outline-light" href="/marketplace">Browse MarketPlace</a></p>
                         </div>
                     </div>
                 </div>
                 <div className="carousel-item">
-                    <img src="https://nftia.infura-ipfs.io/ipfs/QmTmxgu5HAsishnzdCJxEkTTt725TmsTFeg6dGzgKt33Nj" alt="SecondArtCreation" className="imgTrending"/>
+                    <img src="/images/featured_9.jpg" alt="SecondArtCreation" className="imgTrending"/>
                     <div className="container">
                         <div className="carousel-caption text-end">
-                            <h1>One more for good measure.</h1>
-                            <p>Some representative placeholder content for the third slide of this carousel.</p>
-                            <p><a className="btn btn-lg btn-primary" href="/">Browse gallery</a></p>
+                            <h1 className="text-dark fw-bold">Make a Difference.</h1>
+                            <p className="text-dark fw-bold">Inspire and be inspired, create art that leave your mark.</p>
+                            <p><a className="btn btn-lg btn-outline-dark" href="/blog/ia-art-nft-how-it-works">Check How it Works</a></p>
                         </div>
                     </div>
                 </div>

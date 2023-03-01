@@ -1,12 +1,19 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+
 import * as fcl from "@onflow/fcl";
 import * as t from "@onflow/types";
 
 const SaleCollections = ( { user } ) => {
   const [nftsForSale, setNFTsForSale] = useState([]);
 
-  console.log("USER", user);
+  const navigate = useNavigate();
 
+  const goToLogIn = () => {
+    window.scrollTo(0, 0);
+    const button = document.getElementById("signInUpButton");
+    button.classList.add('blinking');
+}
 
   const getUserNFTsForSale = async () => {
   
@@ -21,28 +28,62 @@ const SaleCollections = ( { user } ) => {
     const getNFTs =  await fetch('/api/get_nfts_for_sale', config)
     .then(response => response.json())
     .then(data => {
-          console.log("ntfsforsale",data);
-          const output = data.flatMap(({ _id, matchingElements }) =>
-          matchingElements.map((element) => ({ _id, ...element })));
-          console.log("NEW NFTS",output);
-          setNFTsForSale(output);
+        console.log("ntfsforsale",data);
+        const output = data.flatMap(({ _id, matchingElements }) =>
+        matchingElements.map((element) => ({ _id, ...element })));
+        console.log("NEW NFTS",output);
+        setNFTsForSale(output);
     })
     .catch((error) => {
         console.error("There was an error:", error);
     });  
   }
   
-    
   useEffect(() => {
     getUserNFTsForSale();
-    const intervalId = setInterval(getUserNFTsForSale, 30000);
+    const intervalId = setInterval(getUserNFTsForSale, 20000);
     return () => clearInterval(intervalId);
 }, [])
+
+const removeNftFromMarket = async (c_address, id, s_address) => {
+    
+  let returning_value = false;
+
+    const config = {
+      method: 'POST',
+      headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        c_address: c_address,
+        id, id,
+        s_address: s_address
+        })
+      }
+
+      const removeNftFromMarket_response =  await fetch('/api/removeNftFromMarket', config)
+      .then(response => response.json())
+      .then(data => {
+        console.log("flag user response api", data);
+        returning_value = data;
+        //returning_value =  {"ok": data.ok, "AccountSetUp": data.value?.AccountSetUp? data.value.AccountSetUp : false};
+      })
+      .catch((error) => {
+          // This function will be called if the Promise is rejected with an error
+          console.error("There was an error:", error);
+      });  
+
+    return returning_value;
+}
 
 
 const purchase = async (saleAddress,id) => {
       try{
-
+       
+        if (!user.addr) {
+          return false;
+        }
         const purchaseTRXId = await fcl.mutate({
           cadence: `
           import NFTIA from 0x19e6fc6fdfde98d5
@@ -86,6 +127,8 @@ const purchase = async (saleAddress,id) => {
         console.log("https://testnet.flowscan.org/transaction/"+purchaseTRXId+"/events")
         const purchaseTransaction = await fcl.tx(purchaseTRXId).onceSealed();
         console.log("DONE TRX", purchaseTransaction);
+        //Have to move the NFT ID = [id] FROM SellerAddr = [saleAddress] TO BUYERAddr = [user.addr]
+        removeNftFromMarket(user.addr, id, saleAddress);
         return purchaseTransaction;
       } catch (error) {
         console.log("Error Making TRX - Purchase NFT :", error);
@@ -94,36 +137,37 @@ const purchase = async (saleAddress,id) => {
   
     }
 
-
-  
     return (
-        <div className="container mt-5">
-          <h1 className="text-center mb-5">Marketplace</h1>
+      <div className="container mt-5">
+        <h1 className="text-center mb-5">Marketplace</h1>
 
-          {nftsForSale.length > 0 ? (
-          <div className="album py-5">
-            <div className="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
-             {nftsForSale.map(nft => (
-                  <div key={nft.id} className="col">
-                     <div className="card shadow-sm">
-                          <img src={`https://nftia.infura-ipfs.io/ipfs/${nft.hash}`} className="card-img-top" alt="..."></img>
-                          <div className="card-body bg-dark">
-                            <h4 className="card-title">{nft.name}</h4>
-                            
-                            <p className="card-text d-flex align-items-center ">Price {nft.price} <img src="/images/flow.png" alt="Flow Logo" className="img-fluid flow-icon ms-2 mb-0" /></p>
-
+        {nftsForSale.length > 0 ? (
+        <div className="album py-5">
+          <div className="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
+            {nftsForSale.map(nft => (
+                <div key={nft.id} className="col">
+                    <div className="card shadow-sm">
+                        <img src={`https://nftia.infura-ipfs.io/ipfs/${nft.hash}`} className="card-img-top" alt="..."></img>
+                        <div className="card-body bg-dark">
+                          <h4 className="card-title">{nft.name}</h4>
+                          
+                          <p className="card-text d-flex align-items-center ">Price {nft.price} <img src="/images/flow.png" alt="Flow Logo" className="img-fluid flow-icon ms-2 mb-0" /></p>
+                          { user.addr ?
                             <button className="btn btn-outline-info mt-3" onClick={() => purchase(nft._id, nft.id)}>BUY</button>
-                          </div>     
-                      </div>
-                  </div>
-             ))}
-            </div>
+                            : 
+                            <button className="btn btn-outline-info mt-3" onClick={() => goToLogIn()}>Sign In to Buy</button>
+                          }
+                        </div>     
+                    </div>
+                </div>
+            ))}
           </div>
-          ) : (
-           <h3>No products to sell yet  = ( .</h3>
-          )}
-
         </div>
+        ) : (
+          <h3>Please Wait.</h3>
+        )}
+
+      </div>
     )
   }
   

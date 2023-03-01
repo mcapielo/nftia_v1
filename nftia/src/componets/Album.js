@@ -7,13 +7,12 @@ import './Album.css';
 
 const Album = ({ user }) => {
 
-    const [nfts, setNFTs] = useState([]);
     const [price, setPrice] = useState(0);
     const [showListSpinner, setShowListSpinner] = useState(null);
     const [showUnListSpinner, setShowUnListSpinner] = useState(null);
-
-    
-
+    const [nfts_flow, setFlowData] = useState([]);
+    const [nfts_db, setDBData] = useState([]);
+    const [nfts, setNFTS] = useState([]);
 
     const setNFTSaleStatus =  async (id, price, forSale) => {
     
@@ -172,15 +171,89 @@ const Album = ({ user }) => {
             args: (arg, t) =>[arg(user.addr, t.Address)],
         });
 
-        console.log("resutls", result);
-        setNFTs(result);
+        if(result) {
+          return(result);
+        }
+    }
+
+    const fetchUserData = async () => {
+      const [FlowResponse, DBResponse] = await Promise.all([
+        getUserNFTs(),
+        getUserNFTsFromDb(),
+      ]);
+      
+      if (FlowResponse) {
+        console.log("FlowResponse", FlowResponse);
+        setFlowData(FlowResponse);
+      }
+
+      if (DBResponse) {
+        console.log("DBResponse", DBResponse);
+        setDBData(DBResponse);
+      }
+      
+    }
+
+    const getUser = async () => {
+
+      let response_return = false;
+      
+      const config = {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          c_a: user.addr
+          })
+        }
+  
+        const _userApi =  await fetch('/api/get_user', config)
+        .then(response => response.json())
+        .then(data => {
+          console.log("User response api", data);
+          return response_return = data;
+        })
+        .catch((error) => {
+            console.error("There was an error:", error);
+        });  
+        return response_return
+  
+    }
+
+    const getUserNFTsFromDb = async () => {
+      const _user = await getUser()
+      console.log("_USER", _user);
+      if (_user.NFTCounter === 1) {
+        console.log(_user.NFTCollection);
+        return _user.NFTCollection;
+      }
     }
 
     useEffect(() => {
-        getUserNFTs();
-        const intervalId = setInterval(getUserNFTs, 30000);
-      return () => clearInterval(intervalId);
+        fetchUserData();
+        const intervalId = setInterval(fetchUserData, 20000);
+        return () => clearInterval(intervalId);
     }, [])
+
+
+    useEffect(() => {
+      if (nfts_flow && nfts_db) {
+        const updatedNFTS = nfts_flow.map((nft_flow) => {
+          const matchingProductB = nfts_db.find(
+            (nft_db) => nft_db.id === nft_flow.id
+          );
+          if (matchingProductB) {
+            return { ...nft_flow, price: matchingProductB.price , forSale: matchingProductB.forSale};
+          }
+          return nft_flow;
+        });
+
+        console.log("Updated product list A:", updatedNFTS);
+        setNFTS(updatedNFTS)
+      }
+  }, [nfts_flow, nfts_db]);
 
   return (
     <div className="container text-white ">
@@ -196,24 +269,29 @@ const Album = ({ user }) => {
                           <img src={`https://nftia.infura-ipfs.io/ipfs/${nft.ipfsHash}`} className="card-img-top" alt="..."></img>
                           <div className="card-body bg-dark">
                             <h4 className="card-title">{nft.metadata.name}</h4>
-                            <p className="card-text">Card TEXT</p>
-
                             
                             <h6>Price</h6>                           
                             <div className="input-group mb-3">
-                              <input id="inputPrice" type="number" className="form-control" aria-label="Price for NFT" onChange={(e) => setPrice( parseFloat(e.target.value).toFixed(6) ) } placeholder="Set your Art Price. Ex: 9.34"/>
-                              <span className="input-group-text bg-white">
+                              <input id="inputPrice" type="number" className="form-control" aria-label="Price for NFT" defaultValue={nft.price? nft.price : 0} onChange={(e) => setPrice( parseFloat(e.target.value).toFixed(6) ) }  onFocus={(e) => e.target.placeholder = ""} onBlur={(e) => e.target.placeholder = "0"} placeholder="0"/>
+                              <span className="input-group-text bg-secondary">
                               <img src="/images/flow.png" className="img-fluid flow-icon" alt="Flow Logo"></img>
+                              <span className='ms-2 text-white fw-bold'>Flow</span>
                               </span> 
                             </div>
 
 
                             
                             <div className="row">
+                              { nft.forSale ?
+                                <p>LISTED FOR SALE</p>
+                                :
+                                <p>NOT LISTED FOR SALE</p>
+                              }
+                              
                               <div className="col-md-6">
                                 {showListSpinner ? 
                                   <button className="btn btn-outline-secondary btn-sm w-100" type="button" disabled>
-                                    <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                    <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
                                     Listing for Sale...
                                   </button> 
                                 :
@@ -221,10 +299,9 @@ const Album = ({ user }) => {
                                  } 
                               </div>
                               <div className="col-md-6">
-
                               {showUnListSpinner ? 
                                   <button className="btn btn-outline-secondary btn-sm w-100" type="button" disabled>
-                                    <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                    <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
                                     UnListing for Sale...
                                   </button> 
                                 :

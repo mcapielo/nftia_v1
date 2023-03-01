@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import UserMessage from './UserMessage'
+import './Footer.css';
 
 
 const Footer = () => {
@@ -38,36 +39,33 @@ const Footer = () => {
     <div className="container py-4 my-4 border-top">
         <footer className="py-5">
           <div className="row">
-            <div className="col-6 col-md-2 mb-3">
+            <div className="col-4 col-md-2 mb-3">
               <h5>PRODUCT</h5>
               <ul className="nav flex-column">
-                <li className="nav-item mb-2"><a href="#" className="nav-link p-0 text-muted">Features</a></li>
-                <li className="nav-item mb-2"><a href="#" className="nav-link p-0 text-muted">How it Works</a></li>
-                <li className="nav-item mb-2"><a href="#" className="nav-link p-0 text-muted">Pricing</a></li>
-                <li className="nav-item mb-2"><a href="#" className="nav-link p-0 text-muted">MarketPlace</a></li>
-                <li className="nav-item mb-2"><a href="#" className="nav-link p-0 text-muted">AnotherSector</a></li>
+                <li className="nav-item mb-2"><a href="#" className="nav-link p-0 text-muted link-info">Features</a></li>
+                <li className="nav-item mb-2"><a href="/blog/ia-art-nft-how-it-works" className="nav-link p-0 text-muted link-info">How it Works</a></li>
+                <li className="nav-item mb-2"><a href="#" className="nav-link p-0 text-muted link-info">Pricing</a></li>
+                <li className="nav-item mb-2"><a href="/marketplace" className="nav-link p-0 text-muted link-info">MarketPlace</a></li>
               </ul>
             </div>
 
-            <div className="col-6 col-md-2 mb-3">
+            <div className="col-4 col-md-2 mb-3">
               <h5>HELP</h5>
               <ul className="nav flex-column">
-                <li className="nav-item mb-2"><a href="/" className="nav-link p-0 text-muted">Community</a></li>
-                <li className="nav-item mb-2"><a href="/" className="nav-link p-0 text-muted">Youtube</a></li>
-                <li className="nav-item mb-2"><a href="/" className="nav-link p-0 text-muted">Blog</a></li>
-                <li className="nav-item mb-2"><a href="/" className="nav-link p-0 text-muted">FAQs</a></li>
-                <li className="nav-item mb-2"><a href="/" className="nav-link p-0 text-muted">Docs</a></li>
+                <li className="nav-item mb-2"><a href="/" className="nav-link p-0 text-muted link-info">Community</a></li>
+                <li className="nav-item mb-2"><a href="/" className="nav-link p-0 text-muted link-info">Blog</a></li>
+                <li className="nav-item mb-2"><a href="/" className="nav-link p-0 text-muted link-info">FAQs</a></li>
+                <li className="nav-item mb-2"><a href="/" className="nav-link p-0 text-muted link-info">Docs</a></li>
               </ul>
             </div>
 
-            <div className="col-6 col-md-2 mb-3">
+            <div className="col-4 col-md-2 mb-3">
               <h5>COMPANY</h5>
               <ul className="nav flex-column">
-                <li className="nav-item mb-2"><a href="/" className="nav-link p-0 text-muted">About Us</a></li>
-                <li className="nav-item mb-2"><a href="/" className="nav-link p-0 text-muted">Contact Us</a></li>
-                <li className="nav-item mb-2"><a href="/" className="nav-link p-0 text-muted">Terms of Service</a></li>
-                <li className="nav-item mb-2"><a href="/" className="nav-link p-0 text-muted">Privacy Policy</a></li>
-                <li className="nav-item mb-2"><a href="/" className="nav-link p-0 text-muted">MarketPlace Terms of Service</a></li>
+                <li className="nav-item mb-2"><a href="/" className="nav-link p-0 text-muted link-info">About Us</a></li>
+                <li className="nav-item mb-2"><a href="/" className="nav-link p-0 text-muted link-info">Contact Us</a></li>
+                <li className="nav-item mb-2"><a href="/" className="nav-link p-0 text-muted link-info">Terms of Service</a></li>
+                <li className="nav-item mb-2"><a href="/" className="nav-link p-0 text-muted link-info">Privacy Policy</a></li>
               </ul>
             </div>
 
@@ -82,20 +80,23 @@ const Footer = () => {
                 </div>
               </form>
               <br></br>
+              <p className='text-muted'>You could also contact by email to: <a className='text-info text-decoration-none'>nftia@gmail.com</a>.</p>
                   <UserMessage variant="info" message="Thank you, Now you are subscribed!" triggerAlert={showAlert} />
             </div>
           </div>
 
-          <div className="d-flex flex-column flex-sm-row justify-content-between py-4 my-4 border-top">
-            <p>&copy; 2023 NFTIA, Inc. All rights reserved.</p>
-            <ul className="list-unstyled d-flex">
-              <li className="ms-3"><a className="link-dark" href="/"></a><i className="bi bi-facebook text-white"></i></li>
-              <li className="ms-3"><a className="link-dark" href="/"></a><i className="bi bi-twitter text-white"></i></li>
-              <li className="ms-3"><a className="link-dark" href="/"></a><i className="bi bi-instagram text-white"></i></li>
-              <li className="ms-3"><a className="link-dark" href="/"></a><i className="bi bi-linkedin text-white"></i></li>
-              <li className="ms-3"><a className="link-dark" href="/"></a><i className="bi bi-youtube text-white"></i></li>
+          <div className="d-flex flex-column flex-sm-row justify-content-between align-items-center py-4 my-4 border-top">
+            <p className="text-center mb-3 mb-sm-0">&copy; 2023 NFTIA, Inc. All rights reserved.</p>
+            <img src='/images/builtonflow.png' className='img-fluid mx-auto mb-3 mb-sm-0 buildonFlow'></img>
+            <ul className="list-unstyled d-flex fs-4 mb-0 justify-content-center">
+              <li className="ms-3"><a className="link-dark" href="/"></a><i className="bi bi-facebook text-white link-info"></i></li>
+              <li className="ms-3"><a className="link-dark" href="/"></a><i className="bi bi-twitter text-white link-info"></i></li>
+              <li className="ms-3"><a className="link-dark" href="/"></a><i className="bi bi-instagram text-white link-info"></i></li>
+              <li className="ms-3"><a className="link-dark" href="/"></a><i className="bi bi-linkedin text-white link-info"></i></li>
+              <li className="ms-3"><a className="link-dark" href="/"></a><i className="bi bi-youtube text-white link-info"></i></li>
             </ul>
           </div>
+
         </footer>
       </div>
   

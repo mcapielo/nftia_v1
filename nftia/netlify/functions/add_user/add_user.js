@@ -35,9 +35,7 @@ const handler = async (event) => {
     }
   } catch (error) {
     return { statusCode: 500, body: error.toString() }
-  } finally {
-    await mongoClient.close();
-  }
+  } 
 
 }
 

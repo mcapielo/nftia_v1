@@ -27,7 +27,6 @@ const CreateArtForm = ({user}) => {
   const projectId = process.env.REACT_APP_INFURA_projectId;   
   const projectSecret = process.env.REACT_APP_INFURA_projectSecret;
   const auth = 'Basic ' + Buffer.from(projectId + ':' + projectSecret).toString('base64');
-  // https://nft.api.infura.io/
   const client = ipfsClient.create({
     host: 'ipfs.infura.io',
     port: 5001,
@@ -61,11 +60,8 @@ const CreateArtForm = ({user}) => {
         const add_user_nft =  await fetch('/api/add_user_nft', config)
         .then(response => response.json())
         .then(data => {
-          console.log("flag user response api", data);
-          //returning_value =  {"ok": data.ok, "AccountSetUp": data.value?.AccountSetUp? data.value.AccountSetUp : false};
         })
         .catch((error) => {
-            // This function will be called if the Promise is rejected with an error
             console.error("There was an error:", error);
         });  
 
@@ -90,18 +86,15 @@ const CreateArtForm = ({user}) => {
       const _userApi =  await fetch('/api/get_user', config)
       .then(response => response.json())
       .then(data => {
-        console.log("User response api", data);
         return response_return = data;
       })
       .catch((error) => {
-          // This function will be called if the Promise is rejected with an error
           console.error("There was an error:", error);
       });  
       return response_return
 
   }
 
-  // MINT NFT - CADENCE SCRIPT -> Should be a lambda
   const mint = async () => {
     try {
       
@@ -125,7 +118,6 @@ const CreateArtForm = ({user}) => {
           
           //HANDLE MINT OF THE NFT
           setLoadingMintButton(true);
-          console.log("INPUT PROMT", nft_prompt);
 
           // Moderation
           const moderation_response = await openai.createModeration({
@@ -147,9 +139,7 @@ const CreateArtForm = ({user}) => {
             size: "1024x1024",
           });
 
-          //console.log("response the openia", image_response);
   
-          //console.log("response the openia - only data", image_response.data.data[0].b64_json);
           const imageData = image_response.data.data[0].b64_json;
           const buffer = Buffer.from(imageData, 'base64');
           const added = await client.add(buffer);
@@ -197,12 +187,12 @@ const CreateArtForm = ({user}) => {
             }
             return Minttransaction;
           } catch (error) {
-            console.log("Error Making TRX - Mint NFT", error);
+            console.log("Error:", error);
           }
         }
       }
     } catch (error) {
-      console.log("Error Creating file - IPFS", error);
+      console.log("Error:", error);
     }
   }
 

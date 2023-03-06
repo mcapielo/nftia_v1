@@ -29,7 +29,7 @@ const Footer = () => {
       .catch((err) => console.error(err))
       
     } catch (error) {
-      console.log("THIS IS AN ERROR", error);
+      console.log("Error:", error);
     }
   
   }

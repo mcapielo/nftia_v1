@@ -28,10 +28,8 @@ const SaleCollections = ( { user } ) => {
     const getNFTs =  await fetch('/api/get_nfts_for_sale', config)
     .then(response => response.json())
     .then(data => {
-        console.log("ntfsforsale",data);
         const output = data.flatMap(({ _id, matchingElements }) =>
         matchingElements.map((element) => ({ _id, ...element })));
-        console.log("NEW NFTS",output);
         setNFTsForSale(output);
     })
     .catch((error) => {
@@ -65,12 +63,9 @@ const removeNftFromMarket = async (c_address, id, s_address) => {
       const removeNftFromMarket_response =  await fetch('/api/removeNftFromMarket', config)
       .then(response => response.json())
       .then(data => {
-        console.log("flag user response api", data);
         returning_value = data;
-        //returning_value =  {"ok": data.ok, "AccountSetUp": data.value?.AccountSetUp? data.value.AccountSetUp : false};
       })
       .catch((error) => {
-          // This function will be called if the Promise is rejected with an error
           console.error("There was an error:", error);
       });  
 
@@ -126,12 +121,10 @@ const purchase = async (saleAddress,id) => {
         
         console.log("https://testnet.flowscan.org/transaction/"+purchaseTRXId+"/events")
         const purchaseTransaction = await fcl.tx(purchaseTRXId).onceSealed();
-        console.log("DONE TRX", purchaseTransaction);
-        //Have to move the NFT ID = [id] FROM SellerAddr = [saleAddress] TO BUYERAddr = [user.addr]
         removeNftFromMarket(user.addr, id, saleAddress);
         return purchaseTransaction;
       } catch (error) {
-        console.log("Error Making TRX - Purchase NFT :", error);
+        console.log("Error:", error);
       }
   
   

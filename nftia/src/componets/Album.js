@@ -35,10 +35,8 @@ const Album = ({ user }) => {
         const setNFTSaleStatus =  await fetch('/api/setNFTSaleStatus', config)
         .then(response => response.json())
         .then(data => {
-          console.log("setNFTSaleStatus response api", data);
         })
         .catch((error) => {
-            // This function will be called if the Promise is rejected with an error
             console.error("There was an error:", error);
         });  
 
@@ -47,10 +45,7 @@ const Album = ({ user }) => {
 
     }
 
-    // Put a link of the NFT on the SALECOLLECTION - CADENCE SCRIPT -> Should be a lambda
     const listForSale = async (id) => {
-      console.log("id for listing", id);
-      console.log("price", price);
 
       if (!(typeof price === 'string' && !isNaN(parseFloat(price)) && parseFloat(price) > 0)) {
         window.confirm('Price should be a number greater than 0.');
@@ -86,21 +81,19 @@ const Album = ({ user }) => {
               
               console.log("https://testnet.flowscan.org/transaction/"+listForSaleTRXId+"/events")
               const ListForSaleTransaction = await fcl.tx(listForSaleTRXId).onceSealed();
-              console.log("DONE TRX", ListForSaleTransaction);
               if (ListForSaleTransaction) {
                 setNFTSaleStatus(id, price, true);
                 setShowListSpinner(false);
               }
               return ListForSaleTransaction;
             } catch (error) {
-              console.log("Error Making TRX - List NFT For Sale:", error);
+              console.log("Error:", error);
             }
           
           }
       } 
     }
 
-    // Take out the link of the NFT on the SALECOLLECTION - CADENCE SCRIPT -> Should be a lambda
     const unlistFromSale = async (id) => {
       
       try{
@@ -134,7 +127,6 @@ const Album = ({ user }) => {
         
           console.log("https://testnet.flowscan.org/transaction/"+unListFromSaleTRXId+"/events")
           const unListFromSaleTransaction = await fcl.tx(unListFromSaleTRXId).onceSealed();
-          console.log("DONE TRX", unListFromSaleTransaction);
           if (unListFromSaleTransaction) {
             setNFTSaleStatus(id, 0, false);
             setShowUnListSpinner(false);
@@ -142,12 +134,9 @@ const Album = ({ user }) => {
           return unListFromSaleTransaction;
         }   
       } catch (error) {
-        console.log("Error Making TRX - UnList NFT From Sale:", error);
+        console.log("Error:", error);
       }
-    } 
-
-    //console.log("user addr",user.addr);
-    //console.log("address", props.address);
+    }
 
     const getUserNFTs = async () => {
         const result = await fcl.query({
@@ -183,12 +172,10 @@ const Album = ({ user }) => {
       ]);
       
       if (FlowResponse) {
-        console.log("FlowResponse", FlowResponse);
         setFlowData(FlowResponse);
       }
 
       if (DBResponse) {
-        console.log("DBResponse", DBResponse);
         setDBData(DBResponse);
       }
       
@@ -212,7 +199,6 @@ const Album = ({ user }) => {
         const _userApi =  await fetch('/api/get_user', config)
         .then(response => response.json())
         .then(data => {
-          console.log("User response api", data);
           return response_return = data;
         })
         .catch((error) => {
@@ -224,16 +210,14 @@ const Album = ({ user }) => {
 
     const getUserNFTsFromDb = async () => {
       const _user = await getUser()
-      console.log("_USER", _user);
       if (_user.NFTCounter === 1) {
-        console.log(_user.NFTCollection);
         return _user.NFTCollection;
       }
     }
 
     useEffect(() => {
         fetchUserData();
-        const intervalId = setInterval(fetchUserData, 20000);
+        const intervalId = setInterval(fetchUserData, 60000);
         return () => clearInterval(intervalId);
     }, [])
 
@@ -250,7 +234,6 @@ const Album = ({ user }) => {
           return nft_flow;
         });
 
-        console.log("Updated product list A:", updatedNFTS);
         setNFTS(updatedNFTS)
       }
   }, [nfts_flow, nfts_db]);

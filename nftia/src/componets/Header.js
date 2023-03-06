@@ -29,14 +29,12 @@ const Header = ({ user }) => {
         const add_User =  await fetch('/api/add_user', config)
         .then(response => response.json())
         .then(data => {
-          console.log("Should return this",data);
           if (data.ok) {
             returning_value =  {"ok": data.ok, "AccountSetUp": data.value?.AccountSetUp? data.value.AccountSetUp : false};
           }
         })
         .catch((error) => {
-            // This function will be called if the Promise is rejected with an error
-            console.error("There was an error:", error);
+            console.error("Error:", error);
         });  
 
         return returning_value;
@@ -61,11 +59,8 @@ const Header = ({ user }) => {
         const flag_user_setup =  await fetch('/api/flag_user_setup', config)
         .then(response => response.json())
         .then(data => {
-          console.log("flag user response api", data);
-          //returning_value =  {"ok": data.ok, "AccountSetUp": data.value?.AccountSetUp? data.value.AccountSetUp : false};
         })
         .catch((error) => {
-            // This function will be called if the Promise is rejected with an error
             console.error("There was an error:", error);
         });  
 
@@ -80,19 +75,15 @@ const Header = ({ user }) => {
           setLoadingAuthButton(false);
           return false;
         }
-        console.log("Response from Login", response);
           AddUserApiCall(response.addr)
           .then((data) => {
-            console.log("Response from Api Call", data);
             if (data.ok && data.AccountSetUp) {
               setLoadingAuthButton(false);
               navigate('/workshop');
             } else if (data.ok && data.AccountSetUp === false) {
               const responseSetAccount = SetAccount();
-              console.log("response from set account", responseSetAccount);
               if (responseSetAccount) {
                 FlagUserSetup(response.addr);
-                console.log("ADD to flag", response.addr);
               }
               setLoadingAuthButton(false);
               navigate('/workshop');
@@ -101,26 +92,22 @@ const Header = ({ user }) => {
           .catch((error) => {
             console.error("Error from Login", error);
             //Show an Alert saying Maintenance Mode.
-            navigate('/maitenance');
+            navigate('/maintenance');
           })
         
       })
       .catch((error) => {
         console.error("Error from Login", error);
         //Show an Alert saying Maintenance Mode.
-        navigate('/maitenance');
+        navigate('/maintenance');
       })
 
     }
 
     const SetAccount = async () => {
 
-      //Spinner is on
-
-      //Show an alert saying Last Step...
       setShowSetupUserAlert(true);
 
-      //Cadence Script to set up user
       try{
         const setUpUserTRXId = await fcl.mutate({
           cadence: `
@@ -159,14 +146,12 @@ const Header = ({ user }) => {
         });
         
         const TRId = setUpUserTRXId;
-        console.log(TRId)
         console.log("https://testnet.flowscan.org/transaction/"+ TRId +"/events")
         
         const setUpUsertransaction = await fcl.tx(TRId).onceSealed();
-        console.log("DONE TRX", { setUpUsertransaction });
         return { setUpUsertransaction };
       } catch (error) {
-        console.log("Error Making TRX - SETTING USER:", error);
+        console.log("Error:", error);
       }
     }
 

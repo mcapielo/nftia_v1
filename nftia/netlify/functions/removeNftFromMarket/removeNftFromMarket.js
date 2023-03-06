@@ -33,20 +33,16 @@ const handler = async (event) => {
       { returnOriginal: false }
     );
     
-    // Remove the subelement from the source document...
     await collection.updateOne(
       { _id: s_address },
       { $pull: { NFTCollection: { id: id } } }
     );
     
-    // Get the updated subelement from the subelement.value.NFTCollection array...
     const updatedSubelement = subelement.value.NFTCollection[0];
     
-    // Update the fields of the updated subelement...
     updatedSubelement.price = "0";
     updatedSubelement.forSale = false;
     
-    // Add the updated subelement to the destination document...
     await collection.updateOne(
       { _id: c_address },
       { $addToSet: { NFTCollection: updatedSubelement } }
